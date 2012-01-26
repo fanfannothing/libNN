@@ -99,11 +99,8 @@ void init_constants() {
 }
 
 void test_mnist() {
-  std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > train;
-  std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > test;
-
-  MNIST::get_train(train);
-  MNIST::get_test(test);
+  std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > train = MNIST::get_train();
+  std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > test = MNIST::get_test();
 
   std::vector<std::size_t> network_size = { MNIST::get_vector_size(), 64, MNIST::get_output_size() };
   std::shared_ptr<NeuralNetworkMultiLayer<ActivationFunctionSigmoid> > network(new NeuralNetworkMultiLayer<ActivationFunctionSigmoid>(network_size));
@@ -148,13 +145,11 @@ void test_rprop_xor() {
 }
 
 void test_rprop_mnist() {
-  std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > train;
-  std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > test;
+  std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > train = MNIST::get_train();
+  std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > test = MNIST::get_test();
 
-  MNIST::get_train(train);
-  MNIST::get_test(test);
-
-
+  train.resize(500);
+  test.resize(100);
 
   std::vector<std::size_t> network_size = { MNIST::get_vector_size(), 300, MNIST::get_output_size() };
   std::shared_ptr<NeuralNetworkMultiLayer<ActivationFunctionSigmoid> > network(new NeuralNetworkMultiLayer<ActivationFunctionSigmoid>(network_size));
