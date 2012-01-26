@@ -10,6 +10,7 @@
 
 #include "NeuralNetworkMultiLayer.hpp"
 #include <algorithm>
+#include <omp.h>
 
 /**
  * This is a batch learning algorithm that ignores the sign of the derivative. See the Rprop paper.
@@ -21,19 +22,28 @@ public:
     return (x > 0) - (x < 0);
   }
 
-  static void train_batch(std::shared_ptr<NeuralNetworkMultiLayer<ActivationFunction> > neural_network, std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > labels , double eta_minus = 0.5
+  static void train_batch(std::shared_ptr<NeuralNetworkMultiLayer<ActivationFunction> > neural_network, std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > labels, double eta_minus = 0.5
       , double eta_plus = 1.2, double update_value_min = 1e-6, double update_value_max = 50) {
     neural_network->mse() = 0;
 
-    std::vector<std::shared_ptr<NeuralNetworkLayer<ActivationFunction> > > layers = neural_network->get_layers();
+    std::vector<std::shared_ptr<NeuralNetworkMultiLayer<ActivationFunction> > > clones;
+
+    for (int i = 0; i < omp_get_max_threads(); i++) {
+      clones.push_back(std::shared_ptr<NeuralNetworkMultiLayer<ActivationFunction> >(neural_network->clone()));
+    }
+
+#pragma omp parallel for firstprivate(labels) schedule(static)
     for (std::size_t i = 0; i < labels.size(); i++) {
-      boost::numeric::ublas::vector<double> output = neural_network->f(labels[i].first);
+      std::vector<std::shared_ptr<NeuralNetworkLayer<ActivationFunction> > > layers = clones[omp_get_thread_num()]->get_layers();
+
+      boost::numeric::ublas::vector<double> output = clones[omp_get_thread_num()]->f(labels[i].first);
 
       // compute the error..
       boost::numeric::ublas::vector<double> dedy = labels[i].second - output;
 
-      neural_network->mse() += norm_2(dedy);
+      clones[omp_get_thread_num()]->mse() += norm_2(dedy);
 
+      // technically dedy is supposed to be a diagonal matrix; but it's a vector in our representation so we do an element wise multiplication
       std::transform(dedy.begin(), dedy.end(), layers[layers.size() - 1]->dydx().begin(), dedy.begin(), std::multiplies<double>());
 
       // set the error for the last layer
@@ -56,6 +66,15 @@ public:
         std::shared_ptr<NeuralNetwork> prev = current->get_inputs();
 
         current->dedw() += outer_prod(current->dedy(), prev->get_outputs());
+      }
+    }
+
+    std::vector<std::shared_ptr<NeuralNetworkLayer<ActivationFunction> > > layers = neural_network->get_layers();
+    for (int i = 0; i < omp_get_max_threads(); i++) {
+      neural_network->mse() += clones[i]->mse();
+
+      for (std::size_t j = 0; j < layers.size(); j++) {
+        layers[j]->dedw() += clones[i]->get_layers()[j]->dedw();
       }
     }
     neural_network->mse() /= labels.size();
@@ -94,13 +113,9 @@ public:
       std::fill(current->weights_update_value().data().begin(), current->weights_update_value().data().end(), initial_weights_update_value);
     }
 
-    for (std::size_t i = 0; i != max_rounds; i++) {
+    for (std::size_t i = 0; i != max_rounds && neural_network->mse() > max_error; i++) {
       std::cout << "Rprop round " << i << " mse: " << neural_network->mse() << std::endl;
       train_batch(neural_network, labels, eta_minus, eta_plus, update_value_min, update_value_max);
-      if (neural_network->mse() < max_error) {
-        i = max_rounds;
-        std::cerr << "Rprop done after " << i << std::endl;
-      }
     }
   }
 };

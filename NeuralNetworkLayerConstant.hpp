@@ -37,6 +37,12 @@ public:
     }
     std::cerr << std::endl;
   }
+
+  virtual NeuralNetworkLayerConstant* clone() {
+    NeuralNetworkLayerConstant* clone = new NeuralNetworkLayerConstant(m_outputs.size());
+    clone->m_outputs = m_outputs;
+    return clone;
+  }
 };
 
 #endif /* NEURALNETWORKLAYERCONSTANT_HPP_ */

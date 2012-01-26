@@ -10,6 +10,7 @@
 
 #include <memory>
 #include <random>
+#include <limits>
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
 
@@ -18,8 +19,10 @@ static std::mt19937 mt;
 class NeuralNetwork {
 public:
   NeuralNetwork() {
+    m_mse = std::numeric_limits<double>::max();
   }
   NeuralNetwork(std::shared_ptr<NeuralNetwork> in) {
+    m_mse = std::numeric_limits<double>::max();
     m_prev = in;
   }
 
@@ -89,6 +92,12 @@ public:
 
   virtual double& mse() {
     return m_mse;
+  }
+
+  virtual NeuralNetwork* clone() {
+    std::cerr << "NeuralNetwork::clone() not supported for this type of neural network." << std::endl;
+
+    return NULL;
   }
 
 protected:

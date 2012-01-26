@@ -84,8 +84,25 @@ public:
   virtual boost::numeric::ublas::matrix<double>& dedw_last() {
     return m_dedw_last;
   }
+  virtual NeuralNetworkLayer<ActivationFunction>* clone() {
+    NeuralNetworkLayer<ActivationFunction>* clone = new NeuralNetworkLayer<ActivationFunction>();
+
+    clone->m_mse = m_mse;
+    clone->m_outputs = m_outputs;
+    clone->m_dydx = m_dydx;
+    clone->m_dedy = m_dedy;
+    clone->m_weights = m_weights;
+    clone->m_weights_update_value = m_weights_update_value;
+    clone->m_dedw = m_dedw;
+    clone->m_dedw_last = m_dedw_last;
+
+    return clone;
+  }
 
 protected:
+  NeuralNetworkLayer() {
+  }
+
   boost::numeric::ublas::matrix<double> m_weights;
   boost::numeric::ublas::matrix<double> m_weights_update_value;
   boost::numeric::ublas::matrix<double> m_dedw;

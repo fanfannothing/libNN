@@ -25,6 +25,7 @@ public:
 
     neural_network->mse() += norm_2(dedy);
 
+    // technically dedy is supposed to be a diagonal matrix; but it's a vector in our representation so we do an element wise multiplication
     std::transform(dedy.begin(), dedy.end(), layers[layers.size() - 1]->dydx().begin(), dedy.begin(), std::multiplies<double>());
 
     // set the error for the last layer

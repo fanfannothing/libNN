@@ -72,7 +72,29 @@ public:
     std::cerr << std::endl;
   }
 
+  virtual NeuralNetworkMultiLayer<ActivationFunction>* clone() {
+    NeuralNetworkMultiLayer<ActivationFunction>* clone = new NeuralNetworkMultiLayer<ActivationFunction>();
+
+    clone->m_mse = m_mse;
+    clone->m_input.reset(m_input->clone());
+
+    std::shared_ptr<NeuralNetwork> prev = clone->m_input;
+    for (std::size_t i = 0; i < m_layers.size(); i++) {
+      std::shared_ptr<NeuralNetworkLayer<ActivationFunction> > layer(m_layers[i]->clone());
+      layer->set_inputs(prev);
+
+      clone->m_layers.push_back(layer);
+
+      prev = layer;
+    }
+
+    return clone;
+  }
+
 protected:
+  NeuralNetworkMultiLayer() {
+  }
+
   std::shared_ptr<NeuralNetworkLayerConstant> m_input;
   std::vector<std::shared_ptr<NeuralNetworkLayer<ActivationFunction> > > m_layers;
 };

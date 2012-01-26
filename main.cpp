@@ -148,7 +148,7 @@ void test_rprop_mnist() {
   std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > train = MNIST::get_train();
   std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > test = MNIST::get_test();
 
-  train.resize(500);
+  train.resize(10000);
   test.resize(100);
 
   std::vector<std::size_t> network_size = { MNIST::get_vector_size(), 300, MNIST::get_output_size() };
@@ -161,7 +161,6 @@ void test_rprop_mnist() {
     boost::numeric::ublas::vector<double> output = network->f(train[i].first);
 
     if (index_norm_inf(output) == index_norm_inf(train[i].second)) correct++;
-
   }
   std::cout << "self correct " << correct << "/" << train.size() << " = " << ((double) correct / (double) train.size()) << std::endl;
 
@@ -174,11 +173,16 @@ void test_rprop_mnist() {
   std::cout << "test correct " << correct << "/" << test.size() << " = " << ((double) correct / (double) test.size()) << std::endl;
 }
 
+void omp() {
+  std::cout << "omp_get_max_threads() " << omp_get_max_threads() << std::endl;
+}
+
 int main(int argc, char* argv[]) {
   std::cout.setf(std::ios_base::fixed);
   std::cout.precision(4);
 
   init_constants();
+  omp();
 
   test_backpropagation();
   //test_mnist();
