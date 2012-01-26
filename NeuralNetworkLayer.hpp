@@ -27,7 +27,7 @@ public:
     m_dedw_last.resize(count, in->get_outputs_size(), false);
     m_weights_update_value.resize(count, in->get_outputs_size(), false);
     m_outputs.resize(count, false);
-    m_derivatives.resize(count, false);
+    m_dydx.resize(count, false);
 
     m_dedw.clear();
     m_dedw_last.clear();
@@ -47,7 +47,7 @@ public:
     std::transform(activations.begin(), activations.end(), m_outputs.begin(), std::ptr_fun(&ActivationFunction::f));
 
     // calculate derivative while we are at it...
-    std::transform(activations.begin(), activations.end(), m_outputs.begin(), m_derivatives.begin(), std::ptr_fun(&ActivationFunction::d));
+    std::transform(activations.begin(), activations.end(), m_outputs.begin(), m_dydx.begin(), std::ptr_fun(&ActivationFunction::d));
   }
 
   virtual void print() {
@@ -66,8 +66,8 @@ public:
     std::cerr << std::endl;
 
     std::cerr << "m_errors:\t";
-    for (std::size_t i = 0; i < m_errors.size(); i++) {
-      std::cerr << m_errors[i] << " ";
+    for (std::size_t i = 0; i < m_dedy.size(); i++) {
+      std::cerr << m_dedy[i] << " ";
     }
     std::cerr << std::endl;
   }

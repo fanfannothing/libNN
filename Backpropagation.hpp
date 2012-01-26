@@ -21,25 +21,25 @@ public:
     std::vector<std::shared_ptr<NeuralNetworkLayer<ActivationFunction> > > layers = neural_network->get_layers();
 
     // compute the error..
-    boost::numeric::ublas::vector<double> errors = target - output;
+    boost::numeric::ublas::vector<double> dedy = target - output;
 
-    neural_network->mse() += norm_2(errors);
+    neural_network->mse() += norm_2(dedy);
 
-    std::transform(errors.begin(), errors.end(), layers[layers.size() - 1]->derivatives().begin(), errors.begin(), std::multiplies<double>());
+    std::transform(dedy.begin(), dedy.end(), layers[layers.size() - 1]->dydx().begin(), dedy.begin(), std::multiplies<double>());
 
     // set the error for the last layer
-    layers[layers.size() - 1]->errors() = errors;
+    layers[layers.size() - 1]->dedy() = dedy;
 
-    // backpropagate our errors...
+    // backpropagate our dedy...
     for (std::size_t i = layers.size() - 2; i <= layers.size(); i--) {
       std::shared_ptr<NeuralNetwork> current = layers[i];
       std::shared_ptr<NeuralNetwork> next = layers[i + 1];
 
-      boost::numeric::ublas::vector<double> current_errors = prod(trans(next->weights()), next->errors());
+      boost::numeric::ublas::vector<double> current_errors = prod(trans(next->weights()), next->dedy());
 
-      std::transform(current_errors.begin(), current_errors.end(), current->derivatives().begin(), current_errors.begin(), std::multiplies<double>());
+      std::transform(current_errors.begin(), current_errors.end(), current->dydx().begin(), current_errors.begin(), std::multiplies<double>());
 
-      current->errors() = current_errors;
+      current->dedy() = current_errors;
     }
 
     // now update our weights...
@@ -47,7 +47,7 @@ public:
       std::shared_ptr<NeuralNetwork> current = layers[i];
       std::shared_ptr<NeuralNetwork> prev = current->get_inputs();
 
-      current->weights() += eta * outer_prod(current->errors(), prev->get_outputs());
+      current->weights() += eta * outer_prod(current->dedy(), prev->get_outputs());
     }
   }
 

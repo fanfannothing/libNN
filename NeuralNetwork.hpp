@@ -56,11 +56,11 @@ public:
     return {};
   }
 
-  virtual boost::numeric::ublas::vector<double>& errors() {
-    return m_errors;
+  virtual boost::numeric::ublas::vector<double>& dedy() {
+    return m_dedy;
   }
-  virtual boost::numeric::ublas::vector<double>& derivatives() {
-    return m_derivatives;
+  virtual boost::numeric::ublas::vector<double>& dydx() {
+    return m_dydx;
   }
   virtual boost::numeric::ublas::matrix<double>& weights() {
     std::cerr << "NeuralNetwork::weights() not supported for this type of neural network.";
@@ -97,8 +97,8 @@ protected:
   boost::numeric::ublas::vector<double> m_outputs;
 
   /* bottom two mainly used by the backpropagation algorithm... */
-  boost::numeric::ublas::vector<double> m_derivatives;
-  boost::numeric::ublas::vector<double> m_errors;
+  boost::numeric::ublas::vector<double> m_dydx;
+  boost::numeric::ublas::vector<double> m_dedy;
 
   double m_mse;
 };
