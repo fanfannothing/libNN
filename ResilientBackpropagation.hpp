@@ -23,7 +23,7 @@ public:
   }
 
   static void train_batch(std::shared_ptr<NeuralNetworkMultiLayer<ActivationFunction> > neural_network, std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > labels, double eta_minus = 0.5
-      , double eta_plus = 1.2, double update_value_min = 1e-6, double update_value_max = 50) {
+      , double eta_plus = 1.2, double update_value_min = 1e-9, double update_value_max = 10) {
     neural_network->mse() = 0;
 
     std::vector<std::shared_ptr<NeuralNetworkMultiLayer<ActivationFunction> > > clones;
@@ -39,33 +39,32 @@ public:
       boost::numeric::ublas::vector<double> output = clones[omp_get_thread_num()]->f(labels[i].first);
 
       // compute the error..
-      boost::numeric::ublas::vector<double> dedy = labels[i].second - output;
+      boost::numeric::ublas::vector<double> dedx = labels[i].second - output;
 
-      clones[omp_get_thread_num()]->mse() += norm_2(dedy);
+      clones[omp_get_thread_num()]->mse() += norm_2(dedx);
 
       // technically dedy is supposed to be a diagonal matrix; but it's a vector in our representation so we do an element wise multiplication
-      std::transform(dedy.begin(), dedy.end(), layers[layers.size() - 1]->dydx().begin(), dedy.begin(), std::multiplies<double>());
+      std::transform(dedx.begin(), dedx.end(), layers[layers.size() - 1]->dydx().begin(), dedx.begin(), std::multiplies<double>());
 
       // set the error for the last layer
-      layers[layers.size() - 1]->dedy() = dedy;
+      layers[layers.size() - 1]->dedx() = dedx;
 
       // backpropagate our errors...
       for (std::size_t i = layers.size() - 2; i <= layers.size(); i--) {
         std::shared_ptr<NeuralNetwork> current = layers[i];
         std::shared_ptr<NeuralNetwork> next = layers[i + 1];
 
-        boost::numeric::ublas::vector<double> current_errors = prod(trans(next->weights()), next->dedy());
+        boost::numeric::ublas::vector<double> current_dedx = prod(next->dedx(), next->weights());
+        std::transform(current_dedx.begin(), current_dedx.end(), current->dydx().begin(), current_dedx.begin(), std::multiplies<double>());
 
-        std::transform(current_errors.begin(), current_errors.end(), current->dydx().begin(), current_errors.begin(), std::multiplies<double>());
-
-        current->dedy() = current_errors;
+        current->dedx() = current_dedx;
       }
 
       for (std::size_t i = 0; i < layers.size(); i++) {
         std::shared_ptr<NeuralNetwork> current = layers[i];
         std::shared_ptr<NeuralNetwork> prev = current->get_inputs();
 
-        current->dedw() += outer_prod(current->dedy(), prev->get_outputs());
+        current->dedw() += outer_prod(current->dedx(), prev->get_outputs());
       }
     }
 
@@ -77,7 +76,7 @@ public:
         layers[j]->dedw() += clones[i]->get_layers()[j]->dedw();
       }
     }
-    neural_network->mse() /= labels.size();
+    neural_network->mse() /= 2 * labels.size();
 
     // now we go ahead and update the weights
     for (std::size_t i = 0; i < layers.size(); i++) {
@@ -105,8 +104,8 @@ public:
     }
   }
 
-  static void train(std::shared_ptr<NeuralNetworkMultiLayer<ActivationFunction> > neural_network, std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > labels, std::size_t max_rounds = 1000
-      , double max_error = 0.01, double initial_weights_update_value = 0.1, double eta_minus = 0.5 , double eta_plus = 1.2, double update_value_min = 1e-6, double update_value_max = 50) {
+  static void train(std::shared_ptr<NeuralNetworkMultiLayer<ActivationFunction> > neural_network, std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > labels, std::size_t max_rounds = 100
+      , double max_error = 0.001, double initial_weights_update_value = 0.001, double eta_minus = 0.5 , double eta_plus = 1.2, double update_value_min = 1e-9, double update_value_max = 10) {
     std::vector<std::shared_ptr<NeuralNetworkLayer<ActivationFunction> > > layers = neural_network->get_layers();
     for (std::size_t i = 0; i < layers.size(); i++) {
       std::shared_ptr<NeuralNetwork> current = layers[i];
@@ -114,8 +113,9 @@ public:
     }
 
     for (std::size_t i = 0; i != max_rounds && neural_network->mse() > max_error; i++) {
-      std::cout << "Rprop round " << i << " mse: " << neural_network->mse() << std::endl;
+      std::cout << "Rprop round " << i;
       train_batch(neural_network, labels, eta_minus, eta_plus, update_value_min, update_value_max);
+      std::cout << " mse: " << neural_network->mse() << std::endl;
     }
   }
 };

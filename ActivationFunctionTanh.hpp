@@ -11,6 +11,8 @@
 #include "ActivationFunction.hpp"
 #include <cmath>
 #include <algorithm>
+#include <cassert>
+#include <iostream>
 
 class ActivationFunctionTanh : public ActivationFunction {
 public:
@@ -19,17 +21,16 @@ public:
   virtual ~ActivationFunctionTanh() {
   }
   static double f(double x) {
-    double y = std::tanh(x);
-    y = std::max(y, -0.999);
-    y = std::min(y, 0.999);
+    double y = 1.7159 * std::tanh(0.666666667 * x);
+    // double y = std::tanh(x);
     return y;
   }
   static double d(double x, double y) {
-    return 1 - y * y;
+    return 0.666666667 / 1.7159 * (1.7159 - y) * (1.7159 + y);
+    //return 1.0 - y * y;
   }
   static double bound(double y) {
-    if (y > 0)
-      return 1;
+    if (y > 0) return 1;
     return -1;
   }
 };

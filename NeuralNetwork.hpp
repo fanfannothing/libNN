@@ -59,8 +59,8 @@ public:
     return {};
   }
 
-  virtual boost::numeric::ublas::vector<double>& dedy() {
-    return m_dedy;
+  virtual boost::numeric::ublas::vector<double>& dedx() {
+    return m_dedx;
   }
   virtual boost::numeric::ublas::vector<double>& dydx() {
     return m_dydx;
@@ -107,7 +107,7 @@ protected:
 
   /* bottom two mainly used by the backpropagation algorithm... */
   boost::numeric::ublas::vector<double> m_dydx;
-  boost::numeric::ublas::vector<double> m_dedy;
+  boost::numeric::ublas::vector<double> m_dedx;
 
   double m_mse;
 };

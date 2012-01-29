@@ -33,10 +33,10 @@ void test_backpropagation_sigmoid() {
 
   for (std::size_t i = 0; i < 1000; i++) {
     network->mse() = 0;
-    Backpropagation<ActivationFunctionSigmoid>::train(network, s00, s0);
-    Backpropagation<ActivationFunctionSigmoid>::train(network, s01, s1);
-    Backpropagation<ActivationFunctionSigmoid>::train(network, s10, s1);
-    Backpropagation<ActivationFunctionSigmoid>::train(network, s11, s0);
+    Backpropagation<ActivationFunctionSigmoid>::train_single(network, s00, s0);
+    Backpropagation<ActivationFunctionSigmoid>::train_single(network, s01, s1);
+    Backpropagation<ActivationFunctionSigmoid>::train_single(network, s10, s1);
+    Backpropagation<ActivationFunctionSigmoid>::train_single(network, s11, s0);
     network->mse() /= 4;
   }
 
@@ -52,10 +52,10 @@ void test_backpropagation_tanh() {
 
   for (std::size_t i = 0; i < 5000; i++) {
     network->mse() = 0;
-    Backpropagation<ActivationFunctionTanh>::train(network, t00, t0);
-    Backpropagation<ActivationFunctionTanh>::train(network, t01, t1);
-    Backpropagation<ActivationFunctionTanh>::train(network, t10, t1);
-    Backpropagation<ActivationFunctionTanh>::train(network, t11, t0);
+    Backpropagation<ActivationFunctionTanh>::train_single(network, t00, t0);
+    Backpropagation<ActivationFunctionTanh>::train_single(network, t01, t1);
+    Backpropagation<ActivationFunctionTanh>::train_single(network, t10, t1);
+    Backpropagation<ActivationFunctionTanh>::train_single(network, t11, t0);
     network->mse() /= 4;
   }
 
@@ -98,37 +98,6 @@ void init_constants() {
   s_xor.push_back(std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> >(s11, s0));
 }
 
-void test_mnist() {
-  std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > train = MNIST::get_train();
-  std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > test = MNIST::get_test();
-
-  std::vector<std::size_t> network_size = { MNIST::get_vector_size(), 64, MNIST::get_output_size() };
-  std::shared_ptr<NeuralNetworkMultiLayer<ActivationFunctionSigmoid> > network(new NeuralNetworkMultiLayer<ActivationFunctionSigmoid>(network_size));
-
-  train.resize(500);
-  test.resize(100);
-
-  for (std::size_t i = 0; i < 100; i++) {
-    Backpropagation<ActivationFunctionSigmoid>::train(network, train);
-  }
-
-  int correct = 0;
-  for (std::size_t i = 0; i < train.size(); i++) {
-    boost::numeric::ublas::vector<double> output = network->f(train[i].first);
-
-    if (index_norm_inf(output) == index_norm_inf(train[i].second)) correct++;
-  }
-  std::cout << "self correct " << (double) ((double) correct / (double) train.size()) << std::endl;
-
-  correct = 0;
-  for (std::size_t i = 0; i < test.size(); i++) {
-    boost::numeric::ublas::vector<double> output = network->f(test[i].first);
-
-    if (index_norm_inf(output) == index_norm_inf(test[i].second)) correct++;
-  }
-  std::cout << "test correct " << (double) ((double) correct / (double) test.size()) << std::endl;
-}
-
 void test_rprop_xor() {
   std::vector<std::size_t> network_size = { 2, 3, 1 };
   std::shared_ptr<NeuralNetworkMultiLayer<ActivationFunctionSigmoid> > network(new NeuralNetworkMultiLayer<ActivationFunctionSigmoid>(network_size));
@@ -144,49 +113,57 @@ void test_rprop_xor() {
   assert((correct / s_xor.size()) == 1);
 }
 
+void test_mnist_test(std::shared_ptr<NeuralNetwork> network, std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > test) {
+  int correct = 0;
+  for (std::size_t i = 0; i < test.size(); i++) {
+    boost::numeric::ublas::vector<double> output = network->f(test[i].first);
+
+    if ((max_element(output.begin(), output.end()) - output.begin()) == (max_element(test[i].second.begin(), test[i].second.end()) - test[i].second.begin())) correct++;
+  }
+  std::cout << "correct " << correct << "/" << test.size() << " = " << ((double) correct / (double) test.size()) << std::endl;
+}
+
+void test_mnist(std::shared_ptr<NeuralNetwork> network, std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > train
+    , std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > test) {
+
+  test_mnist_test(network, train);
+  test_mnist_test(network, test);
+}
+
+template<typename ActivationFunction = ActivationFunctionTanh>
 void test_rprop_mnist() {
   std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > train = MNIST::get_train();
   std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > test = MNIST::get_test();
 
-  train.resize(10000);
-  test.resize(100);
-
   std::vector<std::size_t> network_size = { MNIST::get_vector_size(), 300, MNIST::get_output_size() };
-  std::shared_ptr<NeuralNetworkMultiLayer<ActivationFunctionSigmoid> > network(new NeuralNetworkMultiLayer<ActivationFunctionSigmoid>(network_size));
+  std::shared_ptr<NeuralNetworkMultiLayer<ActivationFunction> > network(new NeuralNetworkMultiLayer<ActivationFunction>(network_size));
 
-  ResilientBackpropagation<ActivationFunctionSigmoid>::train(network, train, 100);
-
-  int correct = 0;
-  for (std::size_t i = 0; i < train.size(); i++) {
-    boost::numeric::ublas::vector<double> output = network->f(train[i].first);
-
-    if (index_norm_inf(output) == index_norm_inf(train[i].second)) correct++;
-  }
-  std::cout << "self correct " << correct << "/" << train.size() << " = " << ((double) correct / (double) train.size()) << std::endl;
-
-  correct = 0;
-  for (std::size_t i = 0; i < test.size(); i++) {
-    boost::numeric::ublas::vector<double> output = network->f(test[i].first);
-
-    if (index_norm_inf(output) == index_norm_inf(test[i].second)) correct++;
-  }
-  std::cout << "test correct " << correct << "/" << test.size() << " = " << ((double) correct / (double) test.size()) << std::endl;
+  // test_mnist(network, train, test);
+  ResilientBackpropagation<ActivationFunction>::train(network, train, 25);
+  test_mnist(network, train, test);
+  Backpropagation<ActivationFunction>::train(network, train, 10, 0.001, 0.001);
+  test_mnist(network, train, test);
+  Backpropagation<ActivationFunction>::train(network, train, 10, 0.001, 0.0001);
+  test_mnist(network, train, test);
+  Backpropagation<ActivationFunction>::train(network, train, 10, 0.001, 0.00001);
+  test_mnist(network, train, test);
 }
 
 void omp() {
+  omp_set_num_threads(1);
   std::cout << "omp_get_max_threads() " << omp_get_max_threads() << std::endl;
 }
 
 int main(int argc, char* argv[]) {
   std::cout.setf(std::ios_base::fixed);
-  std::cout.precision(4);
+  std::cout.precision(6);
 
   init_constants();
   omp();
 
-  test_backpropagation();
-  //test_mnist();
-  test_rprop_xor();
+//test_backpropagation();
+//test_mnist();
+//test_rprop_xor();
   test_rprop_mnist();
 
   return 1;

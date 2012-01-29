@@ -60,10 +60,10 @@ void MNIST::load() {
 
     pair.first.resize(get_vector_size(), false);
     pair.second.resize(10, false);
-    pair.second.clear();
+    std::fill(pair.second.begin(), pair.second.end(), -1);
 
     for (std::size_t i = 0; i < get_vector_size(); i++) {
-      pair.first[i] = train_image.get() / 255.0;
+      pair.first[i] = train_image.get() / 255.0 * 2.0 - 1.0;
     }
     pair.second[train_label.get()] = 1.0;
 
@@ -78,10 +78,10 @@ void MNIST::load() {
 
     pair.first.resize(get_vector_size(), false);
     pair.second.resize(10, false);
-    pair.second.clear();
+    std::fill(pair.second.begin(), pair.second.end(), -1);
 
     for (std::size_t i = 0; i < get_vector_size(); i++) {
-      pair.first[i] = test_image.get() / 255.0;
+      pair.first[i] = test_image.get() / 255.0 * 2.0 - 1.0;
     }
     pair.second[test_label.get()] = 1.0;
 

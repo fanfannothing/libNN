@@ -34,7 +34,8 @@ public:
 
     // Yecun98
     // variance should be mean 0 and standard deviation of sqrt(in_size)
-    double r = std::sqrt(3 * in->get_outputs_size());
+    double std = 1 / std::sqrt(in->get_outputs_size());
+    double r = std * 3.46410161514 / 2;
 
     std::generate(m_weights.data().begin(), m_weights.data().end(), std::bind(std::uniform_real_distribution<double>(-r, r), mt));
   }
@@ -66,8 +67,8 @@ public:
     std::cerr << std::endl;
 
     std::cerr << "m_errors:\t";
-    for (std::size_t i = 0; i < m_dedy.size(); i++) {
-      std::cerr << m_dedy[i] << " ";
+    for (std::size_t i = 0; i < m_dedx.size(); i++) {
+      std::cerr << m_dedx[i] << " ";
     }
     std::cerr << std::endl;
   }
@@ -87,10 +88,10 @@ public:
   virtual NeuralNetworkLayer<ActivationFunction>* clone() {
     NeuralNetworkLayer<ActivationFunction>* clone = new NeuralNetworkLayer<ActivationFunction>();
 
-    clone->m_mse = m_mse;
+    //clone->m_mse = m_mse;
     clone->m_outputs = m_outputs;
     clone->m_dydx = m_dydx;
-    clone->m_dedy = m_dedy;
+    clone->m_dedx = m_dedx;
     clone->m_weights = m_weights;
     clone->m_weights_update_value = m_weights_update_value;
     clone->m_dedw = m_dedw;
