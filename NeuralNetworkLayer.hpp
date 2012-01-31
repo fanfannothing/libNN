@@ -17,6 +17,11 @@
 #include <algorithm>
 #include <functional>
 
+#ifdef LIBNNCUDA
+#include <cuda_runtime.h>
+#include <cublas.h>
+#endif
+
 template<class ActivationFunction>
 class NeuralNetworkLayer : public NeuralNetwork {
 public:
@@ -38,6 +43,39 @@ public:
     double r = std * 3.46410161514 / 2;
 
     std::generate(m_weights.data().begin(), m_weights.data().end(), std::bind(std::uniform_real_distribution<double>(-r, r), mt));
+
+#ifdef LIBNNCUDA
+    m_outputs_size_cuda = count;
+    m_weights_m_cuda = count;
+    m_weights_n_cuda = in->get_outputs_size();
+
+    // TODO: fix alignment for more performance later
+    // careful in allocation... CUDA stores matrices in column major format
+    cublasAlloc(m_weights_m_cuda * m_weights_n_cuda, sizeof(double), (void**)&m_weights_cuda);
+    cublasAlloc(m_outputs_size_cuda, sizeof(double), (void**)&m_outputs_cuda);
+    cublasAlloc(m_outputs_size_cuda, sizeof(double), (void**)&m_dydx_cuda);
+    cublasAlloc(m_outputs_size_cuda, sizeof(double), (void**)&m_dedx_cuda);
+
+    // lda is number of rows since the matrices are stored in col-major format
+    m_weights_lda_cuda = m_weights_m_cuda;
+
+    // TODO: need to initalize the weights (i.e. on CUDA instead of copy CPU hack right now)
+    copy_weights_host_to_cuda();
+
+    boost::numeric::ublas::matrix<double> t(m_weights);
+    copy_weights_cuda_to_host();
+
+    assert(std::equal(t.data().begin(), t.data().end(), m_weights.data().begin()));
+#endif
+  }
+
+  ~NeuralNetworkLayer() {
+#ifdef LIBNNCUDA
+    cublasFree(m_weights_cuda);
+    cublasFree(m_outputs_cuda);
+    cublasFree(m_dydx_cuda);
+    cublasFree(m_dedx_cuda);
+#endif
   }
 
   virtual void compute() {
@@ -50,6 +88,31 @@ public:
     // calculate derivative while we are at it...
     std::transform(activations.begin(), activations.end(), m_outputs.begin(), m_dydx.begin(), std::ptr_fun(&ActivationFunction::d));
   }
+
+#ifdef LIBNNCUDA
+  virtual void compute_cuda() {
+    cublasDgemv('N', m_weights_m_cuda, m_weights_n_cuda, 1.0, m_weights_cuda, m_weights_lda_cuda, m_prev->get_outputs_cuda(), 1, 0, m_outputs_cuda, 1);
+
+    ActivationFunction::f_cuda(m_outputs_cuda, m_outputs_size_cuda);
+    ActivationFunction::d_cuda(m_outputs_cuda, m_outputs_size_cuda, m_dydx_cuda);
+  }
+
+  virtual double* get_weights_cuda() {
+    return m_weights_cuda;
+  }
+
+  virtual size_t get_weights_rows_cuda() {
+    return m_weights_m_cuda;
+  }
+
+  virtual size_t get_weights_cols_cuda() {
+    return m_weights_n_cuda;
+  }
+
+  virtual size_t get_weights_lda_cuda() {
+    return m_weights_lda_cuda;
+  }
+#endif
 
   virtual void print() {
     std::cerr << "m_weights:\t";
@@ -105,9 +168,19 @@ protected:
   }
 
   boost::numeric::ublas::matrix<double> m_weights;
+
+  /* used by rprop */
   boost::numeric::ublas::matrix<double> m_weights_update_value;
   boost::numeric::ublas::matrix<double> m_dedw;
   boost::numeric::ublas::matrix<double> m_dedw_last;
+
+#ifdef LIBNNCUDA
+  double* m_weights_cuda;
+  size_t m_weights_m_cuda; /* row */
+  size_t m_weights_n_cuda; /* col */
+  size_t m_weights_lda_cuda; /* assert(m_weights_lda_cuda == m_weights_pitch_cuda / sizeof(double)) */
+  size_t m_weights_pitch_cuda;
+#endif
 };
 
 #endif /* NEURALNETWORKLAYER_HPP_ */

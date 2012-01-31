@@ -10,7 +10,13 @@
 #include "NeuralNetworkMultiLayer.hpp"
 #include "Backpropagation.hpp"
 #include "ResilientBackpropagation.hpp"
+#include "BackpropagationCUDA.hpp"
 #include "MNIST.hpp"
+#include <ctime>
+
+#ifdef LIBNNCUDA
+#include <cublas.h>
+#endif
 
 boost::numeric::ublas::vector<double> s0(1);
 boost::numeric::ublas::vector<double> s1(1);
@@ -130,6 +136,24 @@ void test_mnist(std::shared_ptr<NeuralNetwork> network, std::vector<std::pair<bo
   test_mnist_test(network, test);
 }
 
+void test_mnist_test_cuda(std::shared_ptr<NeuralNetwork> network, std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > test) {
+  int correct = 0;
+  for (std::size_t i = 0; i < test.size(); i++) {
+    network->f_cuda(test[i].first);
+    boost::numeric::ublas::vector<double> output = network->get_outputs();
+
+    if ((max_element(output.begin(), output.end()) - output.begin()) == (max_element(test[i].second.begin(), test[i].second.end()) - test[i].second.begin())) correct++;
+  }
+  std::cout << "correct " << correct << "/" << test.size() << " = " << ((double) correct / (double) test.size()) << std::endl;
+}
+
+void test_mnist_cuda(std::shared_ptr<NeuralNetwork> network, std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > train
+    , std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > test) {
+
+  test_mnist_test_cuda(network, train);
+  test_mnist_test_cuda(network, test);
+}
+
 template<typename ActivationFunction = ActivationFunctionTanh>
 void test_rprop_mnist() {
   std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > train = MNIST::get_train();
@@ -154,17 +178,47 @@ void omp() {
   std::cout << "omp_get_max_threads() " << omp_get_max_threads() << std::endl;
 }
 
+void test_cuda() {
+  std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > train = MNIST::get_train();
+  std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > test = MNIST::get_test();
+
+  train.resize(1000);
+
+  std::vector<std::size_t> network_size = { MNIST::get_vector_size(), 300, MNIST::get_output_size() };
+  std::shared_ptr<NeuralNetworkMultiLayer<ActivationFunctionTanh> > network(new NeuralNetworkMultiLayer<ActivationFunctionTanh>(network_size));
+
+  double start = 0;
+  double end = 0;
+
+  start = std::clock();
+  Backpropagation < ActivationFunctionTanh > ::train(network, train, 20, 0.001, 0.0001);
+  end = std::clock();
+
+  std::cout << (end - start) / 1000 << std::endl;
+
+  start = std::clock();
+  BackpropagationCUDA < ActivationFunctionTanh > ::train(network, train, 20, 0.001, 0.0001);
+  end = std::clock();
+
+  std::cout << (end - start) / 1000 << std::endl;
+  test_mnist_cuda(network, train, test);
+}
+
 int main(int argc, char* argv[]) {
   std::cout.setf(std::ios_base::fixed);
   std::cout.precision(6);
 
+  assert(cublasInit() == CUBLAS_STATUS_SUCCESS);
   init_constants();
   omp();
 
-//test_backpropagation();
-//test_mnist();
-//test_rprop_xor();
-  test_rprop_mnist();
+  //test_backpropagation();
+  //test_mnist();
+  //test_rprop_xor();
+  //test_rprop_mnist();
+  test_cuda();
+
+  cublasShutdown();
 
   return 1;
 }
