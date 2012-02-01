@@ -34,11 +34,9 @@ public:
     return -1;
   }
 
-#ifdef LIBNNCUDA
   /* these two puppies need to be implemented in ActivationFunctionTanh.cu due nvcc not supporting C++0x */
   static void f_cuda(double* x, size_t size);
   static void d_cuda(double* y, size_t size, double* d);
-#endif
 };
 
 #endif /* ACTIVATIONFUNCTIONTANH_H_ */

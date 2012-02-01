@@ -91,6 +91,10 @@ public:
     return m_layers;
   }
 
+  virtual std::shared_ptr<NeuralNetworkLayerConstant> get_layer_input() {
+    return m_input;
+  }
+
   virtual void print() {
     // std::cerr << "MSE: " << mse() << std::endl;
     std::cerr << "Input Layer" << std::endl;
