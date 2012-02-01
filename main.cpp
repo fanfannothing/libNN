@@ -12,10 +12,6 @@
 #include "ResilientBackpropagation.hpp"
 #include "MNIST.hpp"
 
-#ifdef LIBNNCUDA
-#include <cublas.h>
-#endif
-
 boost::numeric::ublas::vector<double> s0(1);
 boost::numeric::ublas::vector<double> s1(1);
 boost::numeric::ublas::vector<double> s00(2);
@@ -128,7 +124,6 @@ int main(int argc, char* argv[]) {
   std::cout.setf(std::ios_base::fixed);
   std::cout.precision(15);
 
-  assert(cublasInit() == CUBLAS_STATUS_SUCCESS);
   init_constants();
   omp();
 
@@ -137,8 +132,6 @@ int main(int argc, char* argv[]) {
   //test_rprop_xor();
   //test_rprop_mnist();
   test_cuda();
-
-  cublasShutdown();
 
   return 1;
 }

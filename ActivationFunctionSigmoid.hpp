@@ -30,14 +30,12 @@ public:
     return 0;
   }
 
-#ifdef LIBNNCUDA
   static void f_cuda(double* x, size_t size) {
     std::cerr << "ActivationFunctionSigmoid::f_cuda(x) not implemented." << std::endl;
   }
   static void d_cuda(double* y, size_t size, double* d) {
     std::cerr << "ActivationFunctionSigmoid::d_cuda(y, d) not implemented." << std::endl;
   }
-#endif
 };
 
 #endif /* ACTIVATIONFUNCTIONSIGMOID_HPP_ */

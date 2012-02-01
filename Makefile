@@ -1,7 +1,7 @@
-CXXFLAGS = -fopenmp -std=c++0x -O3 -Wall -DBOOST_UBLAS_NDEBUG -DLIBNNCUDA -I/usr/local/cuda/include -g
+CXXFLAGS = -fopenmp -std=c++0x -O3 -Wall -DBOOST_UBLAS_NDEBUG -I/usr/local/cuda/include
 
 NVCC = nvcc
-NVCCFLAGS = --gpu-architecture=compute_20 -DLIBNNCUDA
+NVCCFLAGS = --gpu-architecture=compute_20
 
 OBJS =		main.o MNIST.o ActivactionFunctionTanh.o BackpropagationCU.o test_cuda.o
 

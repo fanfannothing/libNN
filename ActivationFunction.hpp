@@ -20,12 +20,10 @@ public:
    virtual double d(double y) = 0;
    */
 
-#ifdef LIBNNCUDA
   /*
    virtual double f_cuda(double* x, size_t size) = 0;
    virtual double d_cuda(double* y, size_t size, double* d) = 0;
    */
-#endif
 };
 
 #endif /* ACTIVATIONFUNCTION_HPP_ */

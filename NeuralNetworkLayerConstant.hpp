@@ -15,35 +15,13 @@ class NeuralNetworkLayerConstant : public NeuralNetwork {
 public:
   NeuralNetworkLayerConstant(std::size_t size) {
     m_outputs.resize(size, false);
-
-#ifdef LIBNNCUDA
-    m_outputs_size_cuda = size;
-
-    cublasAlloc(m_outputs_size_cuda, sizeof(double), (void**)&m_outputs_cuda);
-    //cudaMallocPitch(&m_outputs_cuda, &m_outputs_pitch_cuda, m_outputs_size_cuda * sizeof(double), 1);
-    //cudaMallocPitch(&m_dydx_cuda, &m_outputs_pitch_cuda, m_outputs_size_cuda * sizeof(double), 1);
-    //cudaMallocPitch(&m_dedx_cuda, &m_outputs_pitch_cuda, m_outputs_size_cuda * sizeof(double), 1);
-#endif
   }
 
   NeuralNetworkLayerConstant(boost::numeric::ublas::vector<double> constant) {
     m_outputs = constant;
-
-#ifdef LIBNNCUDA
-    m_outputs_size_cuda = constant.size();
-
-    cublasAlloc(m_outputs_size_cuda, sizeof(double), (void**)&m_outputs_cuda);
-    //cudaMallocPitch(&m_dydx_cuda, &m_outputs_pitch_cuda, m_outputs_size_cuda * sizeof(double), 1);
-    //cudaMallocPitch(&m_dedx_cuda, &m_outputs_pitch_cuda, m_outputs_size_cuda * sizeof(double), 1);
-
-    cudaMemcpy(m_outputs_cuda, &constant[0], m_outputs_size_cuda * sizeof(double), cudaMemcpyHostToDevice);
-#endif
   }
 
   virtual ~NeuralNetworkLayerConstant() {
-#ifdef LIBNNCUDA
-    cublasFree(m_outputs_cuda);
-#endif
   }
 
   virtual void set_value(boost::numeric::ublas::vector<double> value) {
@@ -51,15 +29,6 @@ public:
 
     m_outputs = value;
   }
-
-#ifdef LIBNNCUDA
-  virtual void set_value_cuda(boost::numeric::ublas::vector<double> value) {
-    cudaMemcpy(m_outputs_cuda, &value[0], m_outputs_size_cuda * sizeof(double), cudaMemcpyHostToDevice);
-  }
-
-  virtual void compute_cuda() {}
-#endif
-
   virtual void compute() {
   }
 
@@ -72,9 +41,6 @@ public:
   }
 
   virtual NeuralNetworkLayerConstant* clone() {
-#ifdef LIBNNCUDA
-#warning NeuralNetworkLayerConstant::clone() not implemented for CUDA
-#endif
     NeuralNetworkLayerConstant* clone = new NeuralNetworkLayerConstant(m_outputs.size());
     clone->m_outputs = m_outputs;
     return clone;

@@ -42,41 +42,6 @@ public:
     }
   }
 
-#ifdef LIBNNCUDA
-  virtual void set_value_cuda(boost::numeric::ublas::vector<double> value) {
-    m_input->set_value_cuda(value);
-  }
-
-  virtual void compute_cuda() {
-    for (std::size_t i = 0; i < m_layers.size(); i++) {
-      m_layers[i]->compute_cuda();
-    }
-  }
-
-  virtual double* get_outputs_cuda() {
-    return m_layers[m_layers.size() - 1]->get_outputs_cuda();
-  }
-
-  virtual double* f_cuda(boost::numeric::ublas::vector<double> in) {
-    set_value_cuda(in);
-    compute_cuda();
-    m_layers[m_layers.size() - 1]->copy_outputs_cuda_to_host();
-    return this->get_outputs_cuda();
-  }
-
-  virtual void copy_weights_cuda_to_host() {
-    for (std::size_t i = 0; i < m_layers.size(); i++) {
-      m_layers[i]->copy_weights_cuda_to_host();
-    }
-  }
-
-  virtual void copy_weights_host_to_cuda() {
-    for (std::size_t i = 0; i < m_layers.size(); i++) {
-      m_layers[i]->copy_weights_host_to_cuda();
-    }
-  }
-#endif
-
   virtual boost::numeric::ublas::vector<double> get_outputs() {
     return m_layers[m_layers.size() - 1]->get_outputs();
   }
