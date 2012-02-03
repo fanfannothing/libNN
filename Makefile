@@ -22,5 +22,17 @@ $(TARGET): $(OBJS)
 
 all: $(TARGET) $(TESTS)
 
+test:
+	mkdir alpha
+	cd alpha
+	mkdir beta
+
+data-mnist:
+	${MAKE} -C mnist
+
+data-letor:
+	${MAKE} -C letor
+
 clean:
 	rm -f $(OBJS) $(TARGET)
+
