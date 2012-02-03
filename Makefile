@@ -27,6 +27,8 @@ test:
 	cd alpha
 	mkdir beta
 
+data: data-mnist data-letor
+
 data-mnist:
 	${MAKE} -C mnist
 

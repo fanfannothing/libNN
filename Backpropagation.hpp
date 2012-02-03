@@ -8,22 +8,22 @@
 #ifndef BACKPROPAGATION_HPP_
 #define BACKPROPAGATION_HPP_
 
-#include "NeuralNetworkMultiLayer.hpp"
+#include "NeuralNetworkMultilayerPerceptron.hpp"
+#include "LossFunctionMeanSquaredError.hpp"
 #include <algorithm>
 
-template<class ActivationFunction>
+template<class ActivationFunction, class LossFunction = LossFunctionMeanSquaredError>
 class Backpropagation {
 public:
 
-  static void train_single(std::shared_ptr<NeuralNetworkMultiLayer<ActivationFunction> > neural_network, boost::numeric::ublas::vector<double> input, boost::numeric::ublas::vector<double> target, double eta = 0.001) {
+  static void train_single(std::shared_ptr<NeuralNetworkMultilayerPerceptron<ActivationFunction> > neural_network, boost::numeric::ublas::vector<double> input, boost::numeric::ublas::vector<double> target, double eta = 0.001) {
     boost::numeric::ublas::vector<double> output = neural_network->f(input);
 
     std::vector<std::shared_ptr<NeuralNetworkLayer<ActivationFunction> > > layers = neural_network->get_layers();
 
     // compute the error..
-    boost::numeric::ublas::vector<double> dedx = target - output;
-
-    neural_network->mse() += norm_2(dedx);
+    boost::numeric::ublas::vector<double> dedx;
+    neural_network->mse() += LossFunction::e(target, output, dedx);
 
     // technically dedx is supposed to be a diagonal matrix; but it's a vector in our representation so we do an element wise multiplication
     std::transform(dedx.begin(), dedx.end(), layers[layers.size() - 1]->dydx().begin(), dedx.begin(), std::multiplies<double>());
@@ -51,7 +51,8 @@ public:
     }
   }
 
-  static void train_single(std::shared_ptr<NeuralNetworkMultiLayer<ActivationFunction> > neural_network, std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > labels, double eta = 0.001) {
+  static void train_single(std::shared_ptr<NeuralNetworkMultilayerPerceptron<ActivationFunction> > neural_network, std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > labels, double eta =
+      0.001) {
     neural_network->mse() = 0;
     for (std::size_t i = 0; i < labels.size(); i++) {
       train_single(neural_network, labels[i].first, labels[i].second, eta);
@@ -59,8 +60,8 @@ public:
     neural_network->mse() /= 2 * labels.size();
   }
 
-  static void train(std::shared_ptr<NeuralNetworkMultiLayer<ActivationFunction> > neural_network, std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > labels, std::size_t max_rounds = 100
-      , double max_error = 0.001, double eta = 0.001) {
+  static void train(std::shared_ptr<NeuralNetworkMultilayerPerceptron<ActivationFunction> > neural_network, std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > labels
+      , std::size_t max_rounds = 100 , double max_error = 0.001, double eta = 0.001) {
     for (std::size_t i = 0; i != max_rounds && neural_network->mse() > max_error; i++) {
       std::cout << "Backprop round " << i;
       train_single(neural_network, labels, eta);

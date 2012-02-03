@@ -7,7 +7,7 @@
 
 #include "ActivationFunctionTanh.hpp"
 #include "ActivationFunctionSigmoid.hpp"
-#include "NeuralNetworkMultiLayer.hpp"
+#include "NeuralNetworkMultilayerPerceptron.hpp"
 #include "Backpropagation.hpp"
 #include "ResilientBackpropagation.hpp"
 #include "MNIST.hpp"
@@ -29,7 +29,7 @@ std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ubl
 
 void test_backpropagation_sigmoid() {
   std::vector<std::size_t> network_size = { 2, 3, 1 };
-  std::shared_ptr<NeuralNetworkMultiLayer<ActivationFunctionSigmoid> > network(new NeuralNetworkMultiLayer<ActivationFunctionSigmoid>(network_size));
+  std::shared_ptr<NeuralNetworkMultilayerPerceptron<ActivationFunctionSigmoid> > network(new NeuralNetworkMultilayerPerceptron<ActivationFunctionSigmoid>(network_size));
 
   for (std::size_t i = 0; i < 1000; i++) {
     network->mse() = 0;
@@ -48,7 +48,7 @@ void test_backpropagation_sigmoid() {
 
 void test_backpropagation_tanh() {
   std::vector<std::size_t> network_size = { 2, 3, 1 };
-  std::shared_ptr<NeuralNetworkMultiLayer<ActivationFunctionTanh> > network(new NeuralNetworkMultiLayer<ActivationFunctionTanh>(network_size));
+  std::shared_ptr<NeuralNetworkMultilayerPerceptron<ActivationFunctionTanh> > network(new NeuralNetworkMultilayerPerceptron<ActivationFunctionTanh>(network_size));
 
   for (std::size_t i = 0; i < 5000; i++) {
     network->mse() = 0;
@@ -100,7 +100,7 @@ void init_constants() {
 
 void test_rprop_xor() {
   std::vector<std::size_t> network_size = { 2, 3, 1 };
-  std::shared_ptr<NeuralNetworkMultiLayer<ActivationFunctionSigmoid> > network(new NeuralNetworkMultiLayer<ActivationFunctionSigmoid>(network_size));
+  std::shared_ptr<NeuralNetworkMultilayerPerceptron<ActivationFunctionSigmoid> > network(new NeuralNetworkMultilayerPerceptron<ActivationFunctionSigmoid>(network_size));
 
   ResilientBackpropagation<ActivationFunctionSigmoid>::train(network, s_xor, 100);
 
