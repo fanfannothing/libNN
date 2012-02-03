@@ -66,8 +66,9 @@ public:
     return get_outputs();
   }
 
-  virtual void get_outputs(boost::numeric::ublas::vector<double>& outputs) {
+  virtual double* get_outputs(boost::numeric::ublas::vector<double>& outputs) {
     m_layers[m_layers.size() - 1]->get_outputs(outputs);
+    return get_outputs();
   }
 
   virtual double* f(boost::numeric::ublas::vector<double> in, boost::numeric::ublas::vector<double>& outputs) {

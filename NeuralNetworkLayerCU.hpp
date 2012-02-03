@@ -96,7 +96,7 @@ public:
     return m_weights_lda;
   }
 
-  virtual double* weights() {
+  virtual double*& weights() {
     return m_weights;
   }
 

@@ -31,7 +31,7 @@ public:
     cublasSetVector(target.size(), sizeof(double), &target[0], 1, dedx, 1);
 
     // error calculation
-    neural_network->mse() += LossFunction::e_cuda(dedx, output, target.size(), dedx);
+    neural_network->error() += LossFunction::e_cuda(dedx, output, target.size(), dedx);
 
     // element-wise multiplication with the dydx
     mult(dedx, layers[layers.size() - 1]->dydx(), target.size());
@@ -58,19 +58,19 @@ public:
 
   static void train_single(std::shared_ptr<NeuralNetworkMultilayerPerceptronCU<ActivationFunction> > neural_network, std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > labels, double eta =
       0.001) {
-    neural_network->mse() = 0;
+    neural_network->error() = 0;
     for (std::size_t i = 0; i < labels.size(); i++) {
       train_single(neural_network, labels[i].first, labels[i].second, eta);
     }
-    neural_network->mse() /= labels.size();
+    neural_network->error() /= labels.size();
   }
 
   static void train(std::shared_ptr<NeuralNetworkMultilayerPerceptronCU<ActivationFunction> > neural_network, std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > labels
       , std::size_t max_rounds = 100 , double max_error = 0.001, double eta = 0.001) {
-    for (std::size_t i = 0; i != max_rounds && neural_network->mse() > max_error; i++) {
+    for (std::size_t i = 0; i != max_rounds && neural_network->error() > max_error; i++) {
       std::cout << "Backprop round " << i;
       train_single(neural_network, labels, eta);
-      std::cout << " mse: " << neural_network->mse() << std::endl;
+      std::cout << " mse: " << neural_network->error() << std::endl;
     }
   }
 };

@@ -26,8 +26,8 @@ public:
     m_dedw.resize(count, in->get_outputs_size(), false);
     m_dedw_last.resize(count, in->get_outputs_size(), false);
     m_weights_update_value.resize(count, in->get_outputs_size(), false);
-    m_outputs.resize(count, false);
-    m_dydx.resize(count, false);
+    this->m_outputs.resize(count, false);
+    this->m_dydx.resize(count, false);
 
     m_dedw.clear();
     m_dedw_last.clear();
@@ -45,13 +45,13 @@ public:
 
   virtual void compute() {
     // perform weight calculation
-    boost::numeric::ublas::vector<double> activations = prod(m_weights, m_prev->get_outputs());
+    boost::numeric::ublas::vector<double> activations = prod(m_weights, this->m_prev->get_outputs());
 
     // element wise activation
-    std::transform(activations.begin(), activations.end(), m_outputs.begin(), std::ptr_fun(&ActivationFunction::f));
+    std::transform(activations.begin(), activations.end(), this->m_outputs.begin(), std::ptr_fun(&ActivationFunction::f));
 
     // calculate derivative while we are at it...
-    std::transform(activations.begin(), activations.end(), m_outputs.begin(), m_dydx.begin(), std::ptr_fun(&ActivationFunction::d));
+    std::transform(activations.begin(), activations.end(), this->m_outputs.begin(), this->m_dydx.begin(), std::ptr_fun(&ActivationFunction::d));
   }
 
   virtual void print() {
