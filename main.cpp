@@ -32,12 +32,12 @@ void test_backpropagation_sigmoid() {
   std::shared_ptr<NeuralNetworkMultilayerPerceptron<ActivationFunctionSigmoid> > network(new NeuralNetworkMultilayerPerceptron<ActivationFunctionSigmoid>(network_size));
 
   for (std::size_t i = 0; i < 1000; i++) {
-    network->mse() = 0;
+    network->error() = 0;
     Backpropagation<ActivationFunctionSigmoid>::train_single(network, s00, s0);
     Backpropagation<ActivationFunctionSigmoid>::train_single(network, s01, s1);
     Backpropagation<ActivationFunctionSigmoid>::train_single(network, s10, s1);
     Backpropagation<ActivationFunctionSigmoid>::train_single(network, s11, s0);
-    network->mse() /= 4;
+    network->error() /= 4;
   }
 
   assert(ActivationFunctionSigmoid::bound(network->f(s00)[0]) == s0[0]);
@@ -51,12 +51,12 @@ void test_backpropagation_tanh() {
   std::shared_ptr<NeuralNetworkMultilayerPerceptron<ActivationFunctionTanh> > network(new NeuralNetworkMultilayerPerceptron<ActivationFunctionTanh>(network_size));
 
   for (std::size_t i = 0; i < 5000; i++) {
-    network->mse() = 0;
+    network->error() = 0;
     Backpropagation<ActivationFunctionTanh>::train_single(network, t00, t0);
     Backpropagation<ActivationFunctionTanh>::train_single(network, t01, t1);
     Backpropagation<ActivationFunctionTanh>::train_single(network, t10, t1);
     Backpropagation<ActivationFunctionTanh>::train_single(network, t11, t0);
-    network->mse() /= 4;
+    network->error() /= 4;
   }
 
   assert(ActivationFunctionTanh::bound(network->f(t00)[0]) == t0[0]);

@@ -24,7 +24,7 @@ public:
 
   static void train_batch(std::shared_ptr<NeuralNetworkMultilayerPerceptron<ActivationFunction> > neural_network, std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > labels, double eta_minus = 0.5
       , double eta_plus = 1.2, double update_value_min = 1e-9, double update_value_max = 10) {
-    neural_network->mse() = 0;
+    neural_network->error() = 0;
 
     std::vector<std::shared_ptr<NeuralNetworkMultilayerPerceptron<ActivationFunction> > > clones;
 
@@ -41,7 +41,7 @@ public:
       // compute the error..
       boost::numeric::ublas::vector<double> dedx = labels[i].second - output;
 
-      clones[omp_get_thread_num()]->mse() += norm_2(dedx);
+      clones[omp_get_thread_num()]->error() += norm_2(dedx);
 
       // technically dedy is supposed to be a diagonal matrix; but it's a vector in our representation so we do an element wise multiplication
       std::transform(dedx.begin(), dedx.end(), layers[layers.size() - 1]->dydx().begin(), dedx.begin(), std::multiplies<double>());
@@ -70,13 +70,13 @@ public:
 
     std::vector<std::shared_ptr<NeuralNetworkLayer<ActivationFunction> > > layers = neural_network->get_layers();
     for (int i = 0; i < omp_get_max_threads(); i++) {
-      neural_network->mse() += clones[i]->mse();
+      neural_network->error() += clones[i]->error();
 
       for (std::size_t j = 0; j < layers.size(); j++) {
         layers[j]->dedw() += clones[i]->get_layers()[j]->dedw();
       }
     }
-    neural_network->mse() /= 2 * labels.size();
+    neural_network->error() /= labels.size();
 
     // now we go ahead and update the weights
     for (std::size_t i = 0; i < layers.size(); i++) {
@@ -112,10 +112,10 @@ public:
       std::fill(current->weights_update_value().data().begin(), current->weights_update_value().data().end(), initial_weights_update_value);
     }
 
-    for (std::size_t i = 0; i != max_rounds && neural_network->mse() > max_error; i++) {
+    for (std::size_t i = 0; i != max_rounds && neural_network->error() > max_error; i++) {
       std::cout << "Rprop round " << i;
       train_batch(neural_network, labels, eta_minus, eta_plus, update_value_min, update_value_max);
-      std::cout << " mse: " << neural_network->mse() << std::endl;
+      std::cout << " error: " << neural_network->error() << std::endl;
     }
   }
 };

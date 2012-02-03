@@ -62,7 +62,7 @@ public:
     for (std::size_t i = 0; i < labels.size(); i++) {
       train_single(neural_network, labels[i].first, labels[i].second, eta);
     }
-    neural_network->mse() /= 2 * labels.size();
+    neural_network->mse() /= labels.size();
   }
 
   static void train(std::shared_ptr<NeuralNetworkMultilayerPerceptronCU<ActivationFunction> > neural_network, std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > labels

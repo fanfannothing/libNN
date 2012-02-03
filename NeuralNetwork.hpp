@@ -19,10 +19,10 @@ static std::mt19937 mt;
 class NeuralNetwork {
 public:
   NeuralNetwork() {
-    m_mse = std::numeric_limits<double>::max();
+    m_error = std::numeric_limits<double>::max();
   }
   NeuralNetwork(std::shared_ptr<NeuralNetwork> in) {
-    m_mse = std::numeric_limits<double>::max();
+    m_error = std::numeric_limits<double>::max();
     m_prev = in;
   }
 
@@ -90,8 +90,8 @@ public:
   /* compute the neural network's output based on the input's values */
   virtual void compute() = 0;
 
-  virtual double& mse() {
-    return m_mse;
+  virtual double& error() {
+    return m_error;
   }
 
   virtual NeuralNetwork* clone() {
@@ -109,7 +109,7 @@ protected:
   boost::numeric::ublas::vector<double> m_dydx;
   boost::numeric::ublas::vector<double> m_dedx;
 
-  double m_mse;
+  double m_error;
 };
 
 #endif /* NEURALNETWORK_HPP_ */

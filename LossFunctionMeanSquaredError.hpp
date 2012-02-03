@@ -16,7 +16,7 @@ public:
   static double e(boost::numeric::ublas::vector<double> target, boost::numeric::ublas::vector<double> output, boost::numeric::ublas::vector<double>& dedy) {
     dedy = target - output;
 
-    return norm_2(dedy);
+    return 0.5 * norm_2(dedy);
   }
 
   static double e_cuda(double* target, double* output, size_t count, double* dedy) {
@@ -25,7 +25,7 @@ public:
 
     cublasDaxpy(count, -1, output, 1, dedy, 1);
 
-    return cublasDnrm2(count, dedy, 1);
+    return 0.5 * cublasDnrm2(count, dedy, 1);
   }
 };
 
