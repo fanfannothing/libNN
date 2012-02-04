@@ -8,7 +8,11 @@
 #ifndef ACTIVATIONFUNCTIONLINEAR_HPP_
 #define ACTIVATIONFUNCTIONLINEAR_HPP_
 
+#include "ActivationFunction.hpp"
+#include <iostream>
+
 class ActivationFunctionLinear : public ActivationFunction {
+public:
   ActivationFunctionLinear() {
   }
   virtual ~ActivationFunctionLinear() {
