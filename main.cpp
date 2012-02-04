@@ -11,7 +11,7 @@
 #include "Backpropagation.hpp"
 #include "ResilientBackpropagation.hpp"
 #include "MNIST.hpp"
-
+/*
 boost::numeric::ublas::vector<double> s0(1);
 boost::numeric::ublas::vector<double> s1(1);
 boost::numeric::ublas::vector<double> s00(2);
@@ -118,14 +118,16 @@ void omp() {
   std::cout << "omp_get_max_threads() " << omp_get_max_threads() << std::endl;
 }
 
+*/
+
 void test_cuda();
 
 int main(int argc, char* argv[]) {
   std::cout.setf(std::ios_base::fixed);
   std::cout.precision(15);
 
-  init_constants();
-  omp();
+  //init_constants();
+  //omp();
 
   //test_backpropagation();
   //test_mnist();

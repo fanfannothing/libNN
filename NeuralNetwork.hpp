@@ -15,8 +15,6 @@
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
 
-static std::mt19937 mt;
-
 class NeuralNetwork : public NeuralNetworkBase<boost::numeric::ublas::vector<double>, boost::numeric::ublas::matrix<double>, NeuralNetwork> {
 public:
   using NeuralNetworkBase::get_outputs;
@@ -25,8 +23,8 @@ public:
   NeuralNetwork() {
   }
 
-  NeuralNetwork(std::shared_ptr<NeuralNetwork> in) :
-      NeuralNetworkBase(in) {
+  NeuralNetwork(std::shared_ptr<NeuralNetwork> in, std::shared_ptr<ActivationFunction> activation) :
+      NeuralNetworkBase(in, activation) {
   }
 
   virtual ~NeuralNetwork() {

@@ -8,10 +8,13 @@
 #ifndef NEURALNETWORKBASE_HPP_
 #define NEURALNETWORKBASE_HPP_
 
+#include "ActivationFunction.hpp"
 #include <memory>
 #include <limits>
 #include <iostream>
 #include <boost/numeric/ublas/vector.hpp>
+
+static std::mt19937 mt;
 
 template<class Vector, class Matrix, class NeuralNetworkType>
 class NeuralNetworkBase {
@@ -19,9 +22,11 @@ public:
   NeuralNetworkBase() {
     m_error = std::numeric_limits<double>::max();
   }
-  NeuralNetworkBase(std::shared_ptr<NeuralNetworkType> in) {
+  NeuralNetworkBase(std::shared_ptr<NeuralNetworkType> in, std::shared_ptr<ActivationFunction> activation) {
     m_error = std::numeric_limits<double>::max();
     m_prev = in;
+
+    m_activation = activation;
   }
 
   virtual ~NeuralNetworkBase() {
@@ -96,7 +101,13 @@ public:
     throw;
   }
 
+  virtual std::shared_ptr<ActivationFunction> get_activation_function() {
+    return m_activation;
+  }
+
 protected:
+  std::shared_ptr<ActivationFunction> m_activation;
+
   std::shared_ptr<NeuralNetworkType> m_prev;
   Vector m_outputs;
 

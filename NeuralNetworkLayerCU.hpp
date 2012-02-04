@@ -20,11 +20,10 @@
 #include <cuda_runtime.h>
 #include <cublas.h>
 
-template<class ActivationFunction>
 class NeuralNetworkLayerCU : public NeuralNetworkCU {
 public:
-  NeuralNetworkLayerCU(size_t count, std::shared_ptr<NeuralNetworkCU> in) :
-      NeuralNetworkCU(in) {
+  NeuralNetworkLayerCU(size_t count, std::shared_ptr<NeuralNetworkCU> in, std::shared_ptr<ActivationFunction> activation) :
+      NeuralNetworkCU(in, activation) {
     m_outputs_size = count;
     m_weights_m = count;
     m_weights_n = in->get_outputs_size();
@@ -46,13 +45,13 @@ public:
     double r = std * 3.46410161514 / 2;
 
     boost::numeric::ublas::matrix<double> w(m_weights_m, m_weights_n);
-    std::generate(w.data().begin(), w.data().end(), std::bind(std::uniform_real_distribution<double>(-r, r), mtcu));
+    std::generate(w.data().begin(), w.data().end(), std::bind(std::uniform_real_distribution<double>(-r, r), mt));
 
     set_weights(w);
   }
 
-  NeuralNetworkLayerCU(std::shared_ptr<NeuralNetworkLayer<ActivationFunction> > network, std::shared_ptr<NeuralNetworkCU> in) :
-      NeuralNetworkCU(in) {
+  NeuralNetworkLayerCU(std::shared_ptr<NeuralNetworkLayer> network, std::shared_ptr<NeuralNetworkCU> in) :
+      NeuralNetworkCU(in, std::shared_ptr<ActivationFunction>(network->get_activation_function()->clone())) {
     m_outputs_size = network->get_outputs_size();
     m_weights_m = network->get_outputs_size();
     m_weights_n = in->get_outputs_size();
@@ -80,8 +79,8 @@ public:
   virtual void compute() {
     cublasDgemv('N', m_weights_m, m_weights_n, 1.0, m_weights, m_weights_lda, m_prev->get_outputs(), 1, 0, m_outputs, 1);
 
-    ActivationFunction::f_cuda(m_outputs, m_outputs_size);
-    ActivationFunction::d_cuda(m_outputs, m_outputs_size, m_dydx);
+    m_activation->f_cuda(m_outputs, m_outputs_size);
+    m_activation->d_cuda(m_outputs, m_outputs_size, m_dydx);
   }
 
   virtual size_t get_weights_rows() {

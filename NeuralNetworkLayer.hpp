@@ -8,6 +8,7 @@
 #ifndef NEURALNETWORKLAYER_HPP_
 #define NEURALNETWORKLAYER_HPP_
 
+#include "ActivationFunction.hpp"
 #include "NeuralNetwork.hpp"
 #include <memory>
 #include <random>
@@ -17,11 +18,10 @@
 #include <algorithm>
 #include <functional>
 
-template<class ActivationFunction>
 class NeuralNetworkLayer : public NeuralNetwork {
 public:
-  NeuralNetworkLayer(std::size_t count, std::shared_ptr<NeuralNetwork> in) :
-      NeuralNetwork(in) {
+  NeuralNetworkLayer(std::size_t count, std::shared_ptr<NeuralNetwork> in, std::shared_ptr<ActivationFunction> activaction) :
+      NeuralNetwork(in, activaction) {
     m_weights.resize(count, in->get_outputs_size(), false);
     m_dedw.resize(count, in->get_outputs_size(), false);
     m_dedw_last.resize(count, in->get_outputs_size(), false);
@@ -48,10 +48,10 @@ public:
     boost::numeric::ublas::vector<double> activations = prod(m_weights, this->m_prev->get_outputs());
 
     // element wise activation
-    std::transform(activations.begin(), activations.end(), this->m_outputs.begin(), std::ptr_fun(&ActivationFunction::f));
+    std::transform(activations.begin(), activations.end(), this->m_outputs.begin(), std::bind(&ActivationFunction::f, this->m_activation.get(), std::placeholders::_1));
 
     // calculate derivative while we are at it...
-    std::transform(activations.begin(), activations.end(), this->m_outputs.begin(), this->m_dydx.begin(), std::ptr_fun(&ActivationFunction::d));
+    std::transform(activations.begin(), activations.end(), this->m_outputs.begin(), this->m_dydx.begin(), std::bind(&ActivationFunction::d, this->m_activation.get(), std::placeholders::_1, std::placeholders::_2));
   }
 
   virtual void print() {
@@ -88,8 +88,8 @@ public:
   virtual boost::numeric::ublas::matrix<double>& dedw_last() {
     return m_dedw_last;
   }
-  virtual NeuralNetworkLayer<ActivationFunction>* clone() {
-    NeuralNetworkLayer<ActivationFunction>* clone = new NeuralNetworkLayer<ActivationFunction>();
+  virtual NeuralNetworkLayer* clone() {
+    NeuralNetworkLayer* clone = new NeuralNetworkLayer();
 
     //clone->m_mse = m_mse;
     clone->m_outputs = m_outputs;
@@ -99,6 +99,8 @@ public:
     clone->m_weights_update_value = m_weights_update_value;
     clone->m_dedw = m_dedw;
     clone->m_dedw_last = m_dedw_last;
+
+    // TODO: Clone the ActivactionFunction as well...
 
     return clone;
   }

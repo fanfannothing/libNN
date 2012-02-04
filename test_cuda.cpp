@@ -7,7 +7,6 @@
 
 #include "NeuralNetworkMultilayerPerceptron.hpp"
 #include "NeuralNetworkMultilayerPerceptronCU.hpp"
-#include "ActivationFunctionTanh.hpp"
 #include "Backpropagation.hpp"
 #include "BackpropagationCU.hpp"
 #include "MNIST.hpp"
@@ -58,21 +57,21 @@ void test_cuda() {
   train.resize(100);
 
   std::vector<std::size_t> network_size = { MNIST::get_vector_size(), 300, MNIST::get_output_size() };
-  std::shared_ptr<NeuralNetworkMultilayerPerceptron<ActivationFunctionTanh> > original(new NeuralNetworkMultilayerPerceptron<ActivationFunctionTanh>(network_size));
-  std::shared_ptr<NeuralNetworkMultilayerPerceptronCU<ActivationFunctionTanh> > network(new NeuralNetworkMultilayerPerceptronCU<ActivationFunctionTanh>(original));
+  std::shared_ptr<NeuralNetworkMultilayerPerceptron> original(new NeuralNetworkMultilayerPerceptron(network_size));
+  std::shared_ptr<NeuralNetworkMultilayerPerceptronCU> network(new NeuralNetworkMultilayerPerceptronCU(original));
 
   double start = 0;
   double end = 0;
 
   start = std::clock();
-  Backpropagation<ActivationFunctionTanh>::train(original, train, 10, 0.001, 0.001);
-  Backpropagation<ActivationFunctionTanh>::train(original, train, 10, 0.001, 0.0001);
+  Backpropagation<>::train(original, train, 10, 0.001, 0.001);
+  Backpropagation<>::train(original, train, 10, 0.001, 0.0001);
   end = std::clock();
   std::cout << (end - start) / 1000 << std::endl;
 
   start = std::clock();
-  BackpropagationCU<ActivationFunctionTanh>::train(network, train, 10, 0.001, 0.001);
-  BackpropagationCU<ActivationFunctionTanh>::train(network, train, 10, 0.001, 0.0001);
+  BackpropagationCU<>::train(network, train, 10, 0.001, 0.001);
+  BackpropagationCU<>::train(network, train, 10, 0.001, 0.0001);
   end = std::clock();
 
   std::cout << (end - start) / 1000 << std::endl;

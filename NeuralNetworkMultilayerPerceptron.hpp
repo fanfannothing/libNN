@@ -12,7 +12,6 @@
 #include "NeuralNetworkLayerConstant.hpp"
 #include "ActivationFunctionTanh.hpp"
 
-template<class ActivationFunction = ActivationFunctionTanh>
 class NeuralNetworkMultilayerPerceptron : public NeuralNetwork {
 public:
   /* the first entry is for the input layer... therefore a "two-layer" network actually has 3 entries */
@@ -23,10 +22,13 @@ public:
 
     m_layers.resize(size.size() - 1);
 
-    m_layers[0].reset(new NeuralNetworkLayer<ActivationFunction>(size[1], m_input));
+    /* we default to use tanh activation functions */
+    if (m_layers.size() <= 0) return;
+
+    m_layers[0].reset(new NeuralNetworkLayer(size[1], m_input, std::shared_ptr<ActivationFunction>(new ActivationFunctionTanh())));
     // TODO: switch this to iterators?
     for (std::size_t i = 2; i < size.size(); i++) {
-      m_layers[i - 1].reset(new NeuralNetworkLayer<ActivationFunction>(size[i], m_layers[i - 2]));
+      m_layers[i - 1].reset(new NeuralNetworkLayer(size[i], m_layers[i - 2], std::shared_ptr<ActivationFunction>(new ActivationFunctionTanh())));
     }
   }
 
@@ -53,7 +55,7 @@ public:
     return this->get_outputs();
   }
 
-  virtual std::vector<std::shared_ptr<NeuralNetworkLayer<ActivationFunction> > > get_layers() {
+  virtual std::vector<std::shared_ptr<NeuralNetworkLayer> > get_layers() {
     return m_layers;
   }
 
@@ -77,15 +79,15 @@ public:
     std::cerr << std::endl;
   }
 
-  virtual NeuralNetworkMultilayerPerceptron<ActivationFunction>* clone() {
-    NeuralNetworkMultilayerPerceptron<ActivationFunction>* clone = new NeuralNetworkMultilayerPerceptron<ActivationFunction>();
+  virtual NeuralNetworkMultilayerPerceptron* clone() {
+    NeuralNetworkMultilayerPerceptron* clone = new NeuralNetworkMultilayerPerceptron();
 
     clone->m_error = m_error;
     clone->m_input.reset(m_input->clone());
 
     std::shared_ptr<NeuralNetwork> prev = clone->m_input;
     for (std::size_t i = 0; i < m_layers.size(); i++) {
-      std::shared_ptr<NeuralNetworkLayer<ActivationFunction> > layer(m_layers[i]->clone());
+      std::shared_ptr<NeuralNetworkLayer> layer(m_layers[i]->clone());
       layer->set_inputs(prev);
 
       clone->m_layers.push_back(layer);
@@ -101,7 +103,7 @@ protected:
   }
 
   std::shared_ptr<NeuralNetworkLayerConstant> m_input;
-  std::vector<std::shared_ptr<NeuralNetworkLayer<ActivationFunction> > > m_layers;
+  std::vector<std::shared_ptr<NeuralNetworkLayer> > m_layers;
 };
 
 #endif /* NEURALNETWORKMULTILAYERPERCEPTRON_HPP_ */

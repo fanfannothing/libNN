@@ -16,14 +16,14 @@
 /* NeuralNetworkMultiLayerCU.cu :: x = x * y */
 void mult(double* x, double* y, size_t count);
 
-template<class ActivationFunction, class LossFunction = LossFunctionMeanSquaredError>
+template<class LossFunction = LossFunctionMeanSquaredError>
 class BackpropagationCU {
 public:
 
-  static void train_single(std::shared_ptr<NeuralNetworkMultilayerPerceptronCU<ActivationFunction> > neural_network, boost::numeric::ublas::vector<double> input, boost::numeric::ublas::vector<double> target, double eta = 0.001) {
+  static void train_single(std::shared_ptr<NeuralNetworkMultilayerPerceptronCU> neural_network, boost::numeric::ublas::vector<double> input, boost::numeric::ublas::vector<double> target, double eta = 0.001) {
     double* output = neural_network->f(input);
 
-    std::vector<std::shared_ptr<NeuralNetworkLayerCU<ActivationFunction> > > layers = neural_network->get_layers();
+    std::vector<std::shared_ptr<NeuralNetworkLayerCU> > layers = neural_network->get_layers();
 
     double* dedx = layers[layers.size() - 1]->dedx();
 
@@ -56,8 +56,7 @@ public:
     }
   }
 
-  static void train_single(std::shared_ptr<NeuralNetworkMultilayerPerceptronCU<ActivationFunction> > neural_network, std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > labels, double eta =
-      0.001) {
+  static void train_single(std::shared_ptr<NeuralNetworkMultilayerPerceptronCU> neural_network, std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > labels, double eta = 0.001) {
     neural_network->error() = 0;
     for (std::size_t i = 0; i < labels.size(); i++) {
       train_single(neural_network, labels[i].first, labels[i].second, eta);
@@ -65,8 +64,8 @@ public:
     neural_network->error() /= labels.size();
   }
 
-  static void train(std::shared_ptr<NeuralNetworkMultilayerPerceptronCU<ActivationFunction> > neural_network, std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > labels
-      , std::size_t max_rounds = 100 , double max_error = 0.001, double eta = 0.001) {
+  static void train(std::shared_ptr<NeuralNetworkMultilayerPerceptronCU> neural_network, std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > labels , std::size_t max_rounds = 100
+      , double max_error = 0.001, double eta = 0.001) {
     for (std::size_t i = 0; i != max_rounds && neural_network->error() > max_error; i++) {
       std::cout << "Backprop round " << i;
       train_single(neural_network, labels, eta);

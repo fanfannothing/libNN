@@ -17,8 +17,6 @@
 #include <boost/numeric/ublas/vector.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
 
-static std::mt19937 mtcu;
-
 class NeuralNetworkCU : public NeuralNetworkBase<double*, double*, NeuralNetworkCU> {
 public:
   using NeuralNetworkBase::get_outputs;
@@ -27,8 +25,8 @@ public:
   NeuralNetworkCU() {
   }
 
-  NeuralNetworkCU(std::shared_ptr<NeuralNetworkCU> in) :
-      NeuralNetworkBase(in) {
+  NeuralNetworkCU(std::shared_ptr<NeuralNetworkCU> in, std::shared_ptr<ActivationFunction> activation) :
+      NeuralNetworkBase(in, activation) {
   }
 
   virtual ~NeuralNetworkCU() {

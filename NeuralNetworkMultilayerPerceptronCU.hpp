@@ -13,7 +13,6 @@
 #include "NeuralNetworkLayerConstantCU.hpp"
 #include "ActivationFunctionTanh.hpp"
 
-template<class ActivationFunction = ActivationFunctionTanh>
 class NeuralNetworkMultilayerPerceptronCU : public NeuralNetworkCU {
 public:
   /* the first entry is for the input layer... therefore a "two-layer" network actually has 3 entries */
@@ -24,21 +23,24 @@ public:
 
     m_layers.resize(size.size() - 1);
 
-    m_layers[0].reset(new NeuralNetworkLayerCU<ActivationFunction>(size[1], m_input));
+    /* we default to use tanh activation functions */
+    if (m_layers.size() <= 0) return;
+
+    m_layers[0].reset(new NeuralNetworkLayerCU(size[1], m_input, std::shared_ptr<ActivationFunction>(new ActivationFunctionTanh())));
     // TODO: switch this to iterators?
     for (size_t i = 2; i < size.size(); i++) {
-      m_layers[i - 1].reset(new NeuralNetworkLayerCU<ActivationFunction>(size[i], m_layers[i - 2]));
+      m_layers[i - 1].reset(new NeuralNetworkLayerCU(size[i], m_layers[i - 2], std::shared_ptr<ActivationFunction>(new ActivationFunctionTanh())));
     }
   }
 
-  NeuralNetworkMultilayerPerceptronCU(std::shared_ptr<NeuralNetworkMultilayerPerceptron<ActivationFunction> > network) {
+  NeuralNetworkMultilayerPerceptronCU(std::shared_ptr<NeuralNetworkMultilayerPerceptron> network) {
     m_input.reset(new NeuralNetworkLayerConstantCU(network->get_layer_input()));
 
     m_layers.resize(network->get_layers().size());
-    m_layers[0].reset(new NeuralNetworkLayerCU<ActivationFunction>(network->get_layers()[0], m_input));
+    m_layers[0].reset(new NeuralNetworkLayerCU(network->get_layers()[0], m_input));
 
     for (size_t i = 1; i < m_layers.size(); i++) {
-      m_layers[i].reset(new NeuralNetworkLayerCU<ActivationFunction>(network->get_layers()[i], m_layers[i - 1]));
+      m_layers[i].reset(new NeuralNetworkLayerCU(network->get_layers()[i], m_layers[i - 1]));
     }
   }
 
@@ -81,7 +83,7 @@ public:
     return m_input;
   }
 
-  virtual std::vector<std::shared_ptr<NeuralNetworkLayerCU<ActivationFunction> > > get_layers() {
+  virtual std::vector<std::shared_ptr<NeuralNetworkLayerCU> > get_layers() {
     return m_layers;
   }
 
@@ -90,7 +92,7 @@ protected:
   }
 
   std::shared_ptr<NeuralNetworkLayerConstantCU> m_input;
-  std::vector<std::shared_ptr<NeuralNetworkLayerCU<ActivationFunction> > > m_layers;
+  std::vector<std::shared_ptr<NeuralNetworkLayerCU> > m_layers;
 };
 
 #endif /* NEURALNETWORKMULTILAYERPERCEPTRON_HPP_ */

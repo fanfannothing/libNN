@@ -15,26 +15,25 @@
 /**
  * This is a batch learning algorithm that ignores the sign of the derivative. See the Rprop paper.
  */
-template<class ActivationFunction>
 class ResilientBackpropagation {
 public:
   static double signum(double x) {
     return (x > 0) - (x < 0);
   }
 
-  static void train_batch(std::shared_ptr<NeuralNetworkMultilayerPerceptron<ActivationFunction> > neural_network, std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > labels, double eta_minus = 0.5
+  static void train_batch(std::shared_ptr<NeuralNetworkMultilayerPerceptron> neural_network, std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > labels , double eta_minus = 0.5
       , double eta_plus = 1.2, double update_value_min = 1e-9, double update_value_max = 10) {
     neural_network->error() = 0;
 
-    std::vector<std::shared_ptr<NeuralNetworkMultilayerPerceptron<ActivationFunction> > > clones;
+    std::vector<std::shared_ptr<NeuralNetworkMultilayerPerceptron> > clones;
 
     for (int i = 0; i < omp_get_max_threads(); i++) {
-      clones.push_back(std::shared_ptr<NeuralNetworkMultilayerPerceptron<ActivationFunction> >(neural_network->clone()));
+      clones.push_back(std::shared_ptr<NeuralNetworkMultilayerPerceptron>(neural_network->clone()));
     }
 
 #pragma omp parallel for firstprivate(labels) schedule(static)
     for (std::size_t i = 0; i < labels.size(); i++) {
-      std::vector<std::shared_ptr<NeuralNetworkLayer<ActivationFunction> > > layers = clones[omp_get_thread_num()]->get_layers();
+      std::vector<std::shared_ptr<NeuralNetworkLayer> > layers = clones[omp_get_thread_num()]->get_layers();
 
       boost::numeric::ublas::vector<double> output = clones[omp_get_thread_num()]->f(labels[i].first);
 
@@ -68,7 +67,7 @@ public:
       }
     }
 
-    std::vector<std::shared_ptr<NeuralNetworkLayer<ActivationFunction> > > layers = neural_network->get_layers();
+    std::vector<std::shared_ptr<NeuralNetworkLayer > > layers = neural_network->get_layers();
     for (int i = 0; i < omp_get_max_threads(); i++) {
       neural_network->error() += clones[i]->error();
 
@@ -104,9 +103,9 @@ public:
     }
   }
 
-  static void train(std::shared_ptr<NeuralNetworkMultilayerPerceptron<ActivationFunction> > neural_network, std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > labels, std::size_t max_rounds = 100
+  static void train(std::shared_ptr<NeuralNetworkMultilayerPerceptron> neural_network, std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > labels , std::size_t max_rounds = 100
       , double max_error = 0.001, double initial_weights_update_value = 0.001, double eta_minus = 0.5 , double eta_plus = 1.2, double update_value_min = 1e-9, double update_value_max = 10) {
-    std::vector<std::shared_ptr<NeuralNetworkLayer<ActivationFunction> > > layers = neural_network->get_layers();
+    std::vector<std::shared_ptr<NeuralNetworkLayer> > layers = neural_network->get_layers();
     for (std::size_t i = 0; i < layers.size(); i++) {
       std::shared_ptr<NeuralNetwork> current = layers[i];
       std::fill(current->weights_update_value().data().begin(), current->weights_update_value().data().end(), initial_weights_update_value);
