@@ -16,7 +16,7 @@ class NeuralNetworkMultilayerPerceptron : public NeuralNetwork {
 public:
   /* the first entry is for the input layer... therefore a "two-layer" network actually has 3 entries */
   NeuralNetworkMultilayerPerceptron(std::vector<std::size_t> size) {
-    assert(size.size() >= 2);
+    assert(size.size() >= 1);
 
     m_input.reset(new NeuralNetworkLayerConstant(size[0]));
 
@@ -53,6 +53,13 @@ public:
     set_value(in);
     compute();
     return this->get_outputs();
+  }
+
+  virtual void add_layer(std::shared_ptr<NeuralNetworkLayer> layer) {
+    if (m_layers.size() == 0) layer->set_inputs(m_input);
+    else layer->set_inputs(m_layers[m_layers.size() - 1]);
+
+    m_layers.push_back(layer);
   }
 
   virtual std::vector<std::shared_ptr<NeuralNetworkLayer> > get_layers() {

@@ -79,6 +79,15 @@ public:
     return cuda_ptr;
   }
 
+  virtual void add_layer(std::shared_ptr<NeuralNetworkLayerCU> layer) {
+    if (m_layers.size() == 0)
+      layer->set_inputs(m_input);
+    else
+      layer->set_inputs(m_layers[m_layers.size() - 1]);
+
+    m_layers.push_back(layer);
+  }
+
   virtual std::shared_ptr<NeuralNetworkLayerConstantCU> get_layer_input() {
     return m_input;
   }
