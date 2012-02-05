@@ -22,9 +22,6 @@ public:
 
 protected:
   static void load();
-  static void get_train_next(boost::numeric::ublas::vector<double>& feature, boost::numeric::ublas::vector<double>& target);
-  static void get_test_next(boost::numeric::ublas::vector<double>& feature, boost::numeric::ublas::vector<double>& target);
-
   static std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > m_train;
   static std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > m_test;
 };
