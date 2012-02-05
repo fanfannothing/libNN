@@ -59,7 +59,7 @@ void MNIST::load() {
     std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > pair;
 
     pair.first.resize(get_vector_size(), false);
-    pair.second.resize(10, false);
+    pair.second.resize(get_output_size(), false);
     std::fill(pair.second.begin(), pair.second.end(), -1);
 
     for (std::size_t i = 0; i < get_vector_size(); i++) {
@@ -77,7 +77,7 @@ void MNIST::load() {
     std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > pair;
 
     pair.first.resize(get_vector_size(), false);
-    pair.second.resize(10, false);
+    pair.second.resize(get_output_size(), false);
     std::fill(pair.second.begin(), pair.second.end(), -1);
 
     for (std::size_t i = 0; i < get_vector_size(); i++) {
