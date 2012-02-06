@@ -29,7 +29,7 @@ public:
     std::sort(m_list.begin(), m_list.end(), Comparator);
   }
 
-  std::vector<std::pair<boost::numeric::ublas::vector<double>, double> > get_list() {
+  std::vector<std::pair<boost::numeric::ublas::vector<double>, double> > get_list() const {
     return m_list;
   }
 

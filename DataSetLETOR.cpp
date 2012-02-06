@@ -27,7 +27,7 @@ void DataSetLETOR::load() {
   m_train.clear();
   m_test.clear();
 
-  for (std::size_t i = 0; i < 10000 && train.good(); i++) {
+  for (std::size_t i = 0; i < 100000 && train.good(); i++) {
     std::size_t query;
     boost::numeric::ublas::vector<double> features;
     double label;

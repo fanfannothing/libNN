@@ -13,6 +13,7 @@
 #include "NeuralNetworkMultilayerPerceptron.hpp"
 #include <boost/numeric/ublas/vector.hpp>
 #include "LossFunctionRankNet.hpp"
+#include "RankSet.hpp"
 
 /**
  * Structure is one layer of hidden tanh nodes, followed a linear node
@@ -36,6 +37,23 @@ public:
 
   virtual boost::numeric::ublas::vector<double> f1(boost::numeric::ublas::vector<double> in) {
     return m_network_1->f(in);
+  }
+
+  virtual void train(const RankSet& set) {
+    std::unordered_map<std::size_t, RankList> map = set.get_map();
+    for (std::unordered_map<std::size_t, RankList>::iterator it = map.begin(); it != map.end(); it++) {
+      train(it->second);
+    }
+  }
+
+  virtual void train(const RankList& list) {
+    std::vector<std::pair<boost::numeric::ublas::vector<double>, double> > vec = list.get_list();
+
+    for (std::size_t i = 0; i < vec.size(); i++) {
+      for (std::size_t j = i + 1; j < vec.size(); j++) {
+        train(vec[i].first, vec[j].first);
+      }
+    }
   }
 
   /**

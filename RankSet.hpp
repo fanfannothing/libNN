@@ -25,6 +25,10 @@ public:
     m_set.clear();
   }
 
+  std::unordered_map<std::size_t, RankList> get_map() const {
+    return m_set;
+  }
+
 protected:
   std::unordered_map<std::size_t, RankList> m_set;
 };
