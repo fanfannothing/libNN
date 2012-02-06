@@ -10,7 +10,7 @@
 #include "NeuralNetworkMultilayerPerceptron.hpp"
 #include "Backpropagation.hpp"
 #include "ResilientBackpropagation.hpp"
-#include "MNIST.hpp"
+#include "DataSetMNIST.hpp"
 /*
 boost::numeric::ublas::vector<double> s0(1);
 boost::numeric::ublas::vector<double> s1(1);
@@ -120,11 +120,15 @@ void omp() {
 
 */
 
+void test_RankNet();
+
 void test_cuda();
 
 int main(int argc, char* argv[]) {
   std::cout.setf(std::ios_base::fixed);
   std::cout.precision(15);
+
+  test_RankNet();
 
   //init_constants();
   //omp();
@@ -133,7 +137,7 @@ int main(int argc, char* argv[]) {
   //test_mnist();
   //test_rprop_xor();
   //test_rprop_mnist();
-  test_cuda();
+  //test_cuda();
 
   return 1;
 }

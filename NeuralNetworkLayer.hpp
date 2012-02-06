@@ -92,15 +92,14 @@ public:
     NeuralNetworkLayer* clone = new NeuralNetworkLayer();
 
     //clone->m_mse = m_mse;
-    clone->m_outputs = m_outputs;
-    clone->m_dydx = m_dydx;
-    clone->m_dedx = m_dedx;
+    //clone->m_outputs = m_outputs;
+    //clone->m_dydx = m_dydx;
+    //clone->m_dedx = m_dedx;
     clone->m_weights = m_weights;
-    clone->m_weights_update_value = m_weights_update_value;
-    clone->m_dedw = m_dedw;
-    clone->m_dedw_last = m_dedw_last;
+    //clone->m_weights_update_value = m_weights_update_value;
+    //clone->m_dedw = m_dedw;
 
-    // TODO: Clone the ActivactionFunction as well...
+    clone->m_activation.reset(m_activation->clone());
 
     return clone;
   }

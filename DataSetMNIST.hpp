@@ -5,20 +5,20 @@
  *      Author: wchan
  */
 
-#ifndef MNIST_HPP_
-#define MNIST_HPP_
+#ifndef DATASETMNIST_HPP_
+#define DATASETMNIST_HPP_
 
 #include <iostream>
 #include <fstream>
 #include <boost/numeric/ublas/vector.hpp>
 
-class MNIST {
+class DataSetMNIST {
 public:
   static std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > get_train();
   static std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > get_test();
 
-  static std::size_t get_vector_size();
-  static std::size_t get_output_size();
+  static std::size_t get_feature_size();
+  static std::size_t get_label_size();
 
 protected:
   static void load();
@@ -26,4 +26,4 @@ protected:
   static std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > m_test;
 };
 
-#endif /* MNIST_HPP_ */
+#endif /* DATASETMNIST_HPP_ */

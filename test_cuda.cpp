@@ -9,7 +9,7 @@
 #include "NeuralNetworkMultilayerPerceptronCU.hpp"
 #include "Backpropagation.hpp"
 #include "BackpropagationCU.hpp"
-#include "MNIST.hpp"
+#include "DataSetMNIST.hpp"
 #include <ctime>
 
 void test_mnist_test(std::shared_ptr<NeuralNetwork> network, std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > test) {
@@ -51,12 +51,12 @@ void test_mnist_cuda(std::shared_ptr<NeuralNetworkCU> network, std::vector<std::
 void test_cuda() {
   assert(cublasInit() == CUBLAS_STATUS_SUCCESS);
 
-  std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > train = MNIST::get_train();
-  std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > test = MNIST::get_test();
+  std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > train = DataSetMNIST::get_train();
+  std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > test = DataSetMNIST::get_test();
 
   train.resize(100);
 
-  std::vector<std::size_t> network_size = { MNIST::get_vector_size(), 300, MNIST::get_output_size() };
+  std::vector<std::size_t> network_size = { DataSetMNIST::get_feature_size(), 300, DataSetMNIST::get_label_size() };
   std::shared_ptr<NeuralNetworkMultilayerPerceptron> original(new NeuralNetworkMultilayerPerceptron(network_size));
   std::shared_ptr<NeuralNetworkMultilayerPerceptronCU> network(new NeuralNetworkMultilayerPerceptronCU(original));
 

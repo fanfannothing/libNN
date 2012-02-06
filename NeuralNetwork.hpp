@@ -44,7 +44,6 @@ public:
     outputs = out;
     return out;
   }
-
 };
 
 #endif /* NEURALNETWORK_HPP_ */

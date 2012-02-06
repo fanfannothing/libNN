@@ -16,8 +16,15 @@ template<class LossFunction = LossFunctionMeanSquaredError>
 class Backpropagation {
 public:
 
+  /**
+   * train a single entry... if the input vector passed in is empty (i.e. size 0) the output is taken as is; else it will do a forward pass to recompute the input passed on the input vector passed in
+   */
   static void train_single(std::shared_ptr<NeuralNetworkMultilayerPerceptron> neural_network, boost::numeric::ublas::vector<double> input, boost::numeric::ublas::vector<double> target, double eta = 0.001) {
-    boost::numeric::ublas::vector<double> output = neural_network->f(input);
+    boost::numeric::ublas::vector<double> output;
+    if (input.size() > 0)
+      output = neural_network->f(input);
+    else
+      output = neural_network->get_outputs();
 
     std::vector<std::shared_ptr<NeuralNetworkLayer> > layers = neural_network->get_layers();
 

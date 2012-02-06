@@ -56,8 +56,10 @@ public:
   }
 
   virtual void add_layer(std::shared_ptr<NeuralNetworkLayer> layer) {
-    if (m_layers.size() == 0) layer->set_inputs(m_input);
-    else layer->set_inputs(m_layers[m_layers.size() - 1]);
+    if (m_layers.size() == 0)
+      layer->set_inputs(m_input);
+    else
+      layer->set_inputs(m_layers[m_layers.size() - 1]);
 
     m_layers.push_back(layer);
   }
@@ -86,10 +88,15 @@ public:
     std::cerr << std::endl;
   }
 
+  /**
+   * creates a new NeuralNetworkMultilayerPerceptron with the same structure, weights, and activation function
+   *
+   * output values including derivatives and errors are not cloned however
+   */
   virtual NeuralNetworkMultilayerPerceptron* clone() {
     NeuralNetworkMultilayerPerceptron* clone = new NeuralNetworkMultilayerPerceptron();
 
-    clone->m_error = m_error;
+    // clone->m_activation.reset(m_activation->clone());
     clone->m_input.reset(m_input->clone());
 
     std::shared_ptr<NeuralNetwork> prev = clone->m_input;

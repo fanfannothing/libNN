@@ -5,15 +5,15 @@
  *      Author: wchan
  */
 
-#include "MNIST.hpp"
+#include "DataSetMNIST.hpp"
 #include <cstdint>
 #include <arpa/inet.h>
 #include <cassert>
 
-std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > MNIST::m_train;
-std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > MNIST::m_test;
+std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > DataSetMNIST::m_train;
+std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > DataSetMNIST::m_test;
 
-void MNIST::load() {
+void DataSetMNIST::load() {
   std::ifstream test_image("mnist/t10k-images-idx3-ubyte", std::ifstream::in | std::ifstream::binary);
   std::ifstream test_label("mnist/t10k-labels-idx1-ubyte", std::ifstream::in | std::ifstream::binary);
   std::ifstream train_image("mnist/train-images-idx3-ubyte", std::ifstream::in | std::ifstream::binary);
@@ -58,11 +58,11 @@ void MNIST::load() {
   while (train_image.good() && train_label.good()) {
     std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > pair;
 
-    pair.first.resize(get_vector_size(), false);
-    pair.second.resize(get_output_size(), false);
+    pair.first.resize(get_feature_size(), false);
+    pair.second.resize(get_label_size(), false);
     std::fill(pair.second.begin(), pair.second.end(), -1);
 
-    for (std::size_t i = 0; i < get_vector_size(); i++) {
+    for (std::size_t i = 0; i < get_feature_size(); i++) {
       pair.first[i] = train_image.get() / 255.0 * 2.0 - 1.0;
     }
     pair.second[train_label.get()] = 1.0;
@@ -76,11 +76,11 @@ void MNIST::load() {
   while (test_image.good() && test_label.good()) {
     std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > pair;
 
-    pair.first.resize(get_vector_size(), false);
-    pair.second.resize(get_output_size(), false);
+    pair.first.resize(get_feature_size(), false);
+    pair.second.resize(get_label_size(), false);
     std::fill(pair.second.begin(), pair.second.end(), -1);
 
-    for (std::size_t i = 0; i < get_vector_size(); i++) {
+    for (std::size_t i = 0; i < get_feature_size(); i++) {
       pair.first[i] = test_image.get() / 255.0 * 2.0 - 1.0;
     }
     pair.second[test_label.get()] = 1.0;
@@ -98,7 +98,7 @@ void MNIST::load() {
   train_label.close();
 }
 
-std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > MNIST::get_train() {
+std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > DataSetMNIST::get_train() {
   if (m_train.size() == 0) {
     load();
   }
@@ -106,16 +106,16 @@ std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ubl
   return m_train;
 }
 
-std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > MNIST::get_test() {
+std::vector<std::pair<boost::numeric::ublas::vector<double>, boost::numeric::ublas::vector<double> > > DataSetMNIST::get_test() {
   if (m_test.size() == 0) {
     load();
   }
   return m_test;
 }
 
-std::size_t MNIST::get_vector_size() {
+std::size_t DataSetMNIST::get_feature_size() {
   return 28 * 28;
 }
-std::size_t MNIST::get_output_size() {
+std::size_t DataSetMNIST::get_label_size() {
   return 10;
 }
