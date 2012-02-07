@@ -17,15 +17,31 @@ public:
     m_set[query_id].push_back(features, label);
   }
 
+  void set_ranklist(std::size_t query_id, const RankList& list) {
+    m_set[query_id] = list;
+  }
+
   std::size_t size() {
     return m_set.size();
+  }
+
+  void sort_truth() {
+    for (std::unordered_map<std::size_t, RankList>::iterator it = m_set.begin(); it != m_set.end(); it++) {
+      it->second.sort_truth();
+    }
+  }
+
+  void print() {
+    for (std::unordered_map<std::size_t, RankList>::iterator it = m_set.begin(); it != m_set.end(); it++) {
+      std::cout << it->first << " " << it->second.get_list().size() << std::endl;
+    }
   }
 
   void clear() {
     m_set.clear();
   }
 
-  std::unordered_map<std::size_t, RankList> get_map() const {
+  std::unordered_map<std::size_t, RankList>& get_map() {
     return m_set;
   }
 

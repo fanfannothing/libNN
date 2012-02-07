@@ -21,12 +21,12 @@
 class NeuralNetworkRankNet {
 public:
   NeuralNetworkRankNet(std::size_t input, std::size_t hidden) {
-    m_network_0.reset(new NeuralNetworkMultilayerPerceptron( { input, hidden, 1 }));
+    m_network_0.reset(new NeuralNetworkMultilayerPerceptron( { input, hidden }));
     std::shared_ptr<NeuralNetworkLayer> linear(new NeuralNetworkLayer(1, m_network_0->get_layers()[m_network_0->get_layers().size() - 1], std::shared_ptr<ActivationFunction>(new ActivationFunctionLinear())));
     m_network_0->add_layer(linear);
     m_network_1.reset(m_network_0->clone());
 
-    m_eta = 0.0001;
+    m_eta = 0.001;
   }
   virtual ~NeuralNetworkRankNet() {
   }
@@ -39,21 +39,63 @@ public:
     return m_network_1->f(in);
   }
 
-  virtual void train(const RankSet& set) {
-    std::unordered_map<std::size_t, RankList> map = set.get_map();
-    for (std::unordered_map<std::size_t, RankList>::iterator it = map.begin(); it != map.end(); it++) {
+  /**
+   * Performs a pair-wise...
+   */
+  virtual double test_pair(RankSet& set) {
+    double count = 0;
+    double sum = 0;
+    for (std::unordered_map<std::size_t, RankList>::iterator it = set.get_map().begin(); it != set.get_map().end(); it++) {
+      sum += test_pair(it->second);
+      count += 1;
+    }
+    return sum / count;
+  }
+
+  virtual double test_pair(RankList& list) {
+    double correct = 0;
+    double count = 0;
+
+    for (std::size_t i = 0; i < list.get_list().size(); i++) {
+      for (std::size_t j = i + 1; j < list.get_list().size(); j++) {
+        double oi = f0(list.get_list()[i].first)[0];
+        double oj = f0(list.get_list()[j].first)[0];
+
+        if (((oi - oj) * (list.get_list()[i].second - list.get_list()[j].second)) >= 0) correct++;
+        count++;
+      }
+    }
+
+    return correct / count;
+  }
+
+  virtual void train(RankSet& set) {
+    for (std::unordered_map<std::size_t, RankList>::iterator it = set.get_map().begin(); it != set.get_map().end(); it++) {
       train(it->second);
     }
   }
 
-  virtual void train(const RankList& list) {
-    std::vector<std::pair<boost::numeric::ublas::vector<double>, double> > vec = list.get_list();
-
-    for (std::size_t i = 0; i < vec.size(); i++) {
-      for (std::size_t j = i + 1; j < vec.size(); j++) {
-        train(vec[i].first, vec[j].first);
+  virtual void train(RankList& list) {
+    for (std::size_t i = 0; i < list.get_list().size(); i++) {
+      for (std::size_t j = i + 1; j < list.get_list().size(); j++) {
+        train(list.get_list()[i].first, list.get_list()[j].first);
       }
     }
+  }
+
+  virtual void rank(RankSet& set) {
+    for (std::unordered_map<std::size_t, RankList>::iterator it = set.get_map().begin(); it != set.get_map().end(); it++) {
+      rank(it->second);
+    }
+  }
+
+  virtual void rank(RankList& list) {
+    for (std::size_t i = 0; i < list.get_list().size(); i++) {
+      double r = m_network_0->f(list.get_list()[i].first)[0];
+      list.get_list()[i].third = r;
+    }
+
+    list.sort_ranked();
   }
 
   /**
@@ -103,7 +145,7 @@ public:
       std::shared_ptr<NeuralNetwork> current_1 = layers_1[i];
       std::shared_ptr<NeuralNetwork> prev_1 = current_1->get_inputs();
 
-      boost::numeric::ublas::matrix<double> delta = m_eta * outer_prod(current_0->dedx(), prev_0->get_outputs()) - outer_prod(current_1->dedx(), prev_1->get_outputs());
+      boost::numeric::ublas::matrix<double> delta = m_eta * (outer_prod(current_0->dedx(), prev_0->get_outputs()) - outer_prod(current_1->dedx(), prev_1->get_outputs()));
 
       // updating the weights twice is probably faster than doing a copy/clone later?
       current_0->weights() += delta;
@@ -120,6 +162,7 @@ protected:
 
   std::shared_ptr<NeuralNetworkMultilayerPerceptron> m_network_0;
   std::shared_ptr<NeuralNetworkMultilayerPerceptron> m_network_1;
-};
+}
+;
 
 #endif /* NEURALNETWORKRANKNET_HPP_ */

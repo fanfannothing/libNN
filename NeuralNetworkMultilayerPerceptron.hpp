@@ -96,10 +96,12 @@ public:
   virtual NeuralNetworkMultilayerPerceptron* clone() {
     NeuralNetworkMultilayerPerceptron* clone = new NeuralNetworkMultilayerPerceptron();
 
+    // our activation is empty actually...
     // clone->m_activation.reset(m_activation->clone());
     clone->m_input.reset(m_input->clone());
 
-    std::shared_ptr<NeuralNetwork> prev = clone->m_input;
+    std::cerr << std::flush;
+    std::shared_ptr<NeuralNetwork> prev(clone->m_input);
     for (std::size_t i = 0; i < m_layers.size(); i++) {
       std::shared_ptr<NeuralNetworkLayer> layer(m_layers[i]->clone());
       layer->set_inputs(prev);

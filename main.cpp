@@ -126,7 +126,7 @@ void test_cuda();
 
 int main(int argc, char* argv[]) {
   std::cout.setf(std::ios_base::fixed);
-  std::cout.precision(15);
+  std::cout.precision(6);
 
   test_RankNet();
 

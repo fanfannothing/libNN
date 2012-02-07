@@ -11,6 +11,26 @@
 
 void test_RankNet() {
   RankSet train = DataSetLETOR::get_train();
+  RankSet test = DataSetLETOR::get_test();
 
   std::shared_ptr<NeuralNetworkRankNet> network(new NeuralNetworkRankNet(DataSetLETOR::get_feature_size(), 10));
+
+  for (int i = 0; i < 10; i++)
+    network->train(train);
+  network->rank(train);
+  network->rank(test);
+
+  std::cout << network->test_pair(train) << std::endl;
+  std::cout << network->test_pair(test) << std::endl;
+
+  std::unordered_map<std::size_t, RankList> map = test.get_map();
+
+  double rough = 0;
+  double count = 0;
+  for (std::unordered_map<std::size_t, RankList>::iterator it = map.begin(); it != map.end(); it++) {
+    rough += it->second.get_normalized_discounted_cmulative_gain();
+    count++;
+  }
+
+  std::cout << "rought average ncdg" << rough / count << std::endl;
 }
