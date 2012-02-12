@@ -73,8 +73,15 @@ public:
     return dcg;
   }
 
-  double get_normalized_discounted_cmulative_gain() {
+  double get_normalized_discounted_cumulative_gain() {
     return m_normalization * get_discounted_cumulative_gain();
+  }
+
+  /**
+   * gets the normalization factor
+   */
+  double get_reciprical_max_discounted_cumulative_gain() {
+    return m_normalization;
   }
 
   void print() {

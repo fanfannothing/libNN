@@ -121,14 +121,16 @@ void omp() {
 */
 
 void test_RankNet();
+void test_LambdaRank();
 
-void test_cuda();
+// void test_cuda();
 
 int main(int argc, char* argv[]) {
   std::cout.setf(std::ios_base::fixed);
   std::cout.precision(6);
 
   test_RankNet();
+  test_LambdaRank();
 
   //init_constants();
   //omp();

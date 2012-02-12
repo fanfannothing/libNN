@@ -10,6 +10,7 @@
 
 #include "RankList.hpp"
 #include <unordered_map>
+#include <limits>
 
 class RankSet {
 public:
@@ -28,6 +29,8 @@ public:
   void sort_truth() {
     for (std::unordered_map<std::size_t, RankList>::iterator it = m_set.begin(); it != m_set.end(); it++) {
       it->second.sort_truth();
+
+      if (it->second.get_reciprical_max_discounted_cumulative_gain() == std::numeric_limits<double>::infinity()) m_set.erase(it);
     }
   }
 

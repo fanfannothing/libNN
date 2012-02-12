@@ -26,7 +26,7 @@ public:
     m_network_0->add_layer(linear);
     m_network_1.reset(m_network_0->clone());
 
-    m_eta = 0.001;
+    m_eta = 0.0001;
   }
   virtual ~NeuralNetworkRankNet() {
   }
@@ -151,10 +151,6 @@ public:
       current_0->weights() += delta;
       current_1->weights() += delta;
     }
-  }
-
-  virtual void train() {
-
   }
 
 protected:

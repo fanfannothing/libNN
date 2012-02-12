@@ -1,28 +1,26 @@
 /*
- * test_RankNet.cpp
+ * test_LambdaRank.cpp
  *
- *  Created on: Feb 4, 2012
+ *  Created on: Feb 11, 2012
  *      Author: wchan
  */
 
-#include "NeuralNetworkRankNet.hpp"
+#include "NeuralNetworkLambdaRank.hpp"
 #include "DataSetLETOR.hpp"
 #include "RankSet.hpp"
 
-void test_RankNet() {
-  std::cout << "test_RankNet" << std::endl;
+void test_LambdaRank() {
+  std::cout << "test_LambdaRank" << std::endl;
   RankSet train = DataSetLETOR::get_train();
   RankSet test = DataSetLETOR::get_test();
 
-  std::shared_ptr<NeuralNetworkRankNet> network(new NeuralNetworkRankNet(DataSetLETOR::get_feature_size(), 10));
+  std::shared_ptr<NeuralNetworkLambdaRank> network(new NeuralNetworkLambdaRank(DataSetLETOR::get_feature_size(), 10));
 
   for (int i = 0; i < 10; i++)
     network->train(train);
+
   network->rank(train);
   network->rank(test);
-
-  //std::cout << network->test_pair(train) << std::endl;
-  //std::cout << network->test_pair(test) << std::endl;
 
   std::unordered_map<std::size_t, RankList> map = test.get_map();
 
@@ -35,3 +33,4 @@ void test_RankNet() {
 
   std::cout << "rough average ncdg: " << rough / count << std::endl;
 }
+
