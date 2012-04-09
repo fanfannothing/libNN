@@ -16,7 +16,7 @@ void test_LambdaRank() {
 
   std::shared_ptr<NeuralNetworkLambdaRank> network(new NeuralNetworkLambdaRank(DataSetLETOR::get_feature_size(), 10));
 
-  for (int i = 0; i < 10; i++)
+  for (int i = 0; i < 50; i++)
     network->train(train);
 
   network->rank(train);

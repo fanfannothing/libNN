@@ -16,7 +16,7 @@ void test_RankNet() {
 
   std::shared_ptr<NeuralNetworkRankNet> network(new NeuralNetworkRankNet(DataSetLETOR::get_feature_size(), 10));
 
-  for (int i = 0; i < 10; i++)
+  for (int i = 0; i < 50; i++)
     network->train(train);
   network->rank(train);
   network->rank(test);

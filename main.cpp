@@ -125,12 +125,23 @@ void test_LambdaRank();
 
 // void test_cuda();
 
+void vivian();
+void gladys();
+void poi();
+void test_stock();
+void test_stock_cv();
+
 int main(int argc, char* argv[]) {
   std::cout.setf(std::ios_base::fixed);
   std::cout.precision(6);
 
-  test_RankNet();
-  test_LambdaRank();
+  // vivian();
+  // gladys();
+  // vivian();
+  test_stock_cv();
+
+  //test_RankNet();
+  //test_LambdaRank();
 
   //init_constants();
   //omp();

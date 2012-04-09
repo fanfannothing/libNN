@@ -26,7 +26,7 @@ public:
     std::shared_ptr<NeuralNetworkLayer> linear(new NeuralNetworkLayer(1, m_network->get_layers()[m_network->get_layers().size() - 1], std::shared_ptr<ActivationFunction>(new ActivationFunctionLinear())));
     m_network->add_layer(linear);
 
-    m_eta = 0.0001;
+    m_eta = 0.00001;
   }
 
   virtual ~NeuralNetworkLambdaRank() {

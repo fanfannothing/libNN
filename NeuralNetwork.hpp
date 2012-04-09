@@ -31,7 +31,7 @@ public:
   }
 
   virtual std::size_t get_outputs_size() {
-    return this->m_outputs.size();
+    return this->get_outputs().size();
   }
 
   virtual boost::numeric::ublas::vector<double> get_outputs(boost::numeric::ublas::vector<double>& outputs) {
